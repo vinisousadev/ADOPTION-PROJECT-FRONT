@@ -1,0 +1,482 @@
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.app-header__content {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.app-logo {
+  color: var(--color-text-strong);
+  font-size: 18px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.app-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.app-nav a {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+  padding: 0 10px;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.app-nav a:hover,
+.app-nav a.active {
+  background: #eef4ff;
+  color: var(--color-primary);
+}
+
+.session-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-text-strong);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.session-summary span {
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.session-summary button {
+  min-height: 36px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0 12px;
+  background: var(--color-surface);
+  color: var(--color-text-strong);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.session-summary button:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.app-main {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  flex: 1;
+  padding: 48px 0;
+}
+
+.app-footer {
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.app-footer__content {
+  width: min(1120px, calc(100% - 32px));
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  margin: 0 auto;
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.page {
+  display: grid;
+  gap: 16px;
+}
+
+.page h1 {
+  max-width: 720px;
+}
+
+.page p {
+  max-width: 680px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.button {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  padding: 0 16px;
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button--secondary {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-strong);
+}
+
+.button--danger {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.button:hover {
+  filter: brightness(0.96);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.eyebrow {
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.auth-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  align-items: start;
+  gap: 48px;
+}
+
+.auth-page--wide {
+  grid-template-columns: minmax(0, 0.8fr) minmax(420px, 1.2fr);
+}
+
+.auth-copy {
+  display: grid;
+  gap: 16px;
+}
+
+.form-panel {
+  display: grid;
+  gap: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 24px;
+  background: var(--color-surface);
+}
+
+.form-field {
+  display: grid;
+  gap: 8px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.form-field--full {
+  grid-column: 1 / -1;
+}
+
+.form-field label {
+  color: var(--color-text-strong);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  min-height: 42px;
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0 12px;
+  background: #fff;
+  color: var(--color-text-strong);
+}
+
+.form-field textarea {
+  min-height: 112px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.form-field select {
+  cursor: pointer;
+}
+
+.form-field select:disabled {
+  cursor: not-allowed;
+  color: var(--color-text);
+  background: #f3f4f6;
+}
+
+.field-hint {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 13px;
+}
+
+.cropper-panel {
+  display: grid;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.cropper-frame {
+  position: relative;
+  height: 320px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: #111827;
+}
+
+.cropper-controls {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.cropper-controls label {
+  margin: 0;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  border-color: var(--color-primary);
+  outline: 3px solid #dbeafe;
+}
+
+.form-error {
+  border-radius: 6px;
+  padding: 12px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.form-success {
+  border-radius: 6px;
+  padding: 12px;
+  background: #ecfdf5;
+  color: #047857;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.test-panel {
+  display: grid;
+  gap: 16px;
+  max-width: 680px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 20px;
+  background: var(--color-surface);
+}
+
+.test-panel h2 {
+  color: var(--color-text-strong);
+  font-size: 20px;
+}
+
+.test-panel__message {
+  border-radius: 6px;
+  padding: 12px;
+  background: #f8fafc;
+  color: var(--color-text-strong);
+  font-size: 14px;
+}
+
+.simple-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.empty-state {
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 18px;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.animal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.animal-card {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0 14px 14px;
+  background: var(--color-surface);
+}
+
+.animal-card__photo {
+  width: calc(100% + 28px);
+  height: 240px;
+  margin: 0 -14px;
+  object-fit: cover;
+  object-position: center 35%;
+  background: #f1f5f9;
+}
+
+.animal-card__photo--empty {
+  display: grid;
+  place-items: center;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.animal-card__header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 8px 12px;
+}
+
+.animal-card h2 {
+  margin: 0 0 4px;
+  color: var(--color-text-strong);
+  font-size: 20px;
+}
+
+.animal-card__header p {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.animal-card__header span {
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: #ecfdf5;
+  color: #047857;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.animal-card__description {
+  min-height: 40px;
+  margin: 0;
+  color: var(--color-text);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.animal-card dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.animal-card dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.animal-card dt {
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.animal-card dd {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-size: 13px;
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .app-header__content {
+    min-height: auto;
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 16px 0;
+    gap: 12px;
+  }
+
+  .app-nav {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .app-nav a {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .session-summary {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .app-main {
+    padding: 32px 0;
+  }
+
+  .auth-page {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-field--full {
+    grid-column: auto;
+  }
+
+  .animal-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .animal-card__photo {
+    height: 220px;
+  }
+}
