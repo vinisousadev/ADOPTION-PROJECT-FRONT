@@ -68,3 +68,23 @@ export function formatAnimalWeight(weightKg: number | undefined) {
 
   return `${weightKg.toLocaleString('pt-BR')} kg`
 }
+
+export function formatAnimalLocation(animal: AnimalResponse) {
+  if (animal.ownerCity && animal.ownerState) {
+    return `${animal.ownerCity} - ${animal.ownerState}`
+  }
+
+  if (animal.ownerCity) {
+    return animal.ownerCity
+  }
+
+  if (animal.ownerState) {
+    return animal.ownerState
+  }
+
+  return 'Nao informada'
+}
+
+export function formatAnimalOwnerName(ownerName: string | undefined) {
+  return ownerName || 'Nao informado'
+}

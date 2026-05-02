@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
-import { getMainAnimalPhotoUrl } from '../services/animalPhotoService'
+import { Link } from 'react-router-dom'
+import { AnimalPhotoCarousel } from '../components/AnimalPhotoCarousel'
+import { getAnimalPhotos } from '../services/animalPhotoService'
 import { deleteAnimal, getMyAnimals } from '../services/animalService'
-import type { AnimalResponse } from '../types'
+import type { AnimalPhotoResponse, AnimalResponse } from '../types'
 import {
   formatAnimalAge,
+  formatAnimalLocation,
   formatAnimalSex,
   formatAnimalSize,
   formatAnimalStatus,
@@ -12,8 +15,8 @@ import { getApiErrorMessage } from '../utils/getApiErrorMessage'
 
 export function MyAnimalsPage() {
   const [animals, setAnimals] = useState<AnimalResponse[]>([])
-  const [photoUrlsByAnimalId, setPhotoUrlsByAnimalId] = useState<
-    Record<number, string>
+  const [photosByAnimalId, setPhotosByAnimalId] = useState<
+    Record<number, AnimalPhotoResponse[]>
   >({})
   const [successMessage, setSuccessMessage] = useState('')
   const [deletingAnimalId, setDeletingAnimalId] = useState<number | null>(null)
@@ -29,26 +32,24 @@ export function MyAnimalsPage() {
         )
         setAnimals(visibleAnimals)
 
-        const photoUrlEntries = await Promise.all(
+        const photoEntries = await Promise.all(
           visibleAnimals.map(async (animal) => {
             try {
-              const photoUrl = await getMainAnimalPhotoUrl(animal.id)
-              return [animal.id, photoUrl] as const
+              const photosResponse = await getAnimalPhotos(animal.id)
+              return [animal.id, photosResponse.content] as const
             } catch {
-              return [animal.id, undefined] as const
+              return [animal.id, [] as AnimalPhotoResponse[]] as const
             }
           }),
         )
 
-        const nextPhotoUrlsByAnimalId: Record<number, string> = {}
+        const nextPhotosByAnimalId: Record<number, AnimalPhotoResponse[]> = {}
 
-        photoUrlEntries.forEach(([animalId, photoUrl]) => {
-          if (photoUrl) {
-            nextPhotoUrlsByAnimalId[animalId] = photoUrl
-          }
+        photoEntries.forEach(([animalId, photos]) => {
+          nextPhotosByAnimalId[animalId] = photos
         })
 
-        setPhotoUrlsByAnimalId(nextPhotoUrlsByAnimalId)
+        setPhotosByAnimalId(nextPhotosByAnimalId)
       } catch (error) {
         setMessage(getApiErrorMessage(error))
       } finally {
@@ -77,11 +78,11 @@ export function MyAnimalsPage() {
       setAnimals((currentAnimals) =>
         currentAnimals.filter((currentAnimal) => currentAnimal.id !== animal.id),
       )
-      setPhotoUrlsByAnimalId((currentPhotoUrls) => {
-        const nextPhotoUrls = { ...currentPhotoUrls }
-        delete nextPhotoUrls[animal.id]
+      setPhotosByAnimalId((currentPhotos) => {
+        const nextPhotos = { ...currentPhotos }
+        delete nextPhotos[animal.id]
 
-        return nextPhotoUrls
+        return nextPhotos
       })
       setSuccessMessage('Animal removido com sucesso.')
     } catch (error) {
@@ -108,17 +109,10 @@ export function MyAnimalsPage() {
         <div className="animal-grid">
           {animals.map((animal) => (
             <article className="animal-card" key={animal.id}>
-              {photoUrlsByAnimalId[animal.id] ? (
-                <img
-                  className="animal-card__photo"
-                  src={photoUrlsByAnimalId[animal.id]}
-                  alt={`Foto de ${animal.animalName}`}
-                />
-              ) : (
-                <div className="animal-card__photo animal-card__photo--empty">
-                  Sem foto
-                </div>
-              )}
+              <AnimalPhotoCarousel
+                animalName={animal.animalName}
+                photos={photosByAnimalId[animal.id] ?? []}
+              />
 
               <div className="animal-card__header">
                 <h2>{animal.animalName}</h2>
@@ -143,9 +137,19 @@ export function MyAnimalsPage() {
                   <dt>Sexo</dt>
                   <dd>{formatAnimalSex(animal.sex)}</dd>
                 </div>
+                <div>
+                  <dt>Localizacao</dt>
+                  <dd>{formatAnimalLocation(animal)}</dd>
+                </div>
               </dl>
 
               <div className="actions">
+                <Link
+                  className="button button--secondary"
+                  to={`/animals/${animal.id}/edit`}
+                >
+                  Editar
+                </Link>
                 <button
                   className="button button--danger"
                   type="button"

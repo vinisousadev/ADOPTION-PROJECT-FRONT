@@ -25,6 +25,8 @@ export function AppLayout() {
               <>
                 <NavLink to="/animals/new">Cadastrar animal</NavLink>
                 <NavLink to="/my-animals">Meus animais</NavLink>
+                <NavLink to="/my-adoption-requests">Meus pedidos</NavLink>
+                <NavLink to="/received-adoption-requests">Recebidos</NavLink>
                 <div className="session-summary">
                   <span>
                     {user.name} - {user.userType}

@@ -16,5 +16,11 @@ export type AdoptionRequestResponse = {
   requestDate: string
   responseDate?: string
   animalId: number
+  animalName?: string
   userId: number
+  requesterName?: string
+  ownerId?: number
+  ownerName?: string
+  ownerCity?: string
+  ownerState?: string
 }

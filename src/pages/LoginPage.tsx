@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { login } from '../services/authService'
+import { useAuth } from '../contexts/AuthContext'
 import { getApiErrorMessage } from '../utils/getApiErrorMessage'
 
 export function LoginPage() {
   
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
@@ -18,19 +19,7 @@ export function LoginPage() {
     setIsSubmitting(true)
 
     try {
-      const loginResponse = await login({ email, password })
-
-      localStorage.setItem('adoption:token', loginResponse.token)
-      localStorage.setItem(
-        'adoption:user',
-        JSON.stringify({
-          userId: loginResponse.userId,
-          name: loginResponse.name,
-          email: loginResponse.email,
-          userType: loginResponse.userType,
-        }),
-      )
-
+      await login({ email, password })
       navigate('/')
     } catch (error) {
       setErrorMessage(getApiErrorMessage(error))

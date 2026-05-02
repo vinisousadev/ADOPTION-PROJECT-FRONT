@@ -21,6 +21,8 @@ export type CreateAnimalRequest = {
   description?: string
 }
 
+export type PatchAnimalRequest = Partial<CreateAnimalRequest>
+
 export type AnimalResponse = {
   id: number
   animalName: string
@@ -38,4 +40,7 @@ export type AnimalResponse = {
   status: AnimalStatus
   registrationDate: string
   userId: number
+  ownerName?: string
+  ownerCity?: string
+  ownerState?: string
 }

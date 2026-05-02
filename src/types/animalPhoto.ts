@@ -6,6 +6,11 @@ export type CreateAnimalPhotoRequest = {
   animalId: number
 }
 
+export type PatchAnimalPhotoRequest = {
+  photoUrl?: string
+  isMain?: YesNo
+}
+
 export type AnimalPhotoResponse = {
   id: number
   photoUrl: string

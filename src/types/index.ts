@@ -6,6 +6,7 @@ export type {
   AnimalSex,
   AnimalStatus,
   CreateAnimalRequest,
+  PatchAnimalRequest,
   YesNo,
 } from './animal'
 export type {
@@ -13,6 +14,10 @@ export type {
   AdoptionRequestStatus,
   CreateAdoptionRequest,
 } from './adoptionRequest'
-export type { AnimalPhotoResponse, CreateAnimalPhotoRequest } from './animalPhoto'
+export type {
+  AnimalPhotoResponse,
+  CreateAnimalPhotoRequest,
+  PatchAnimalPhotoRequest,
+} from './animalPhoto'
 export type { ApiErrorResponse, PageMetadata, PagedResponse } from './api'
 export type { BrazilianCity, BrazilianState } from './location'

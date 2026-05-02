@@ -2,6 +2,7 @@ import type {
   AnimalPhotoResponse,
   CreateAnimalPhotoRequest,
   PagedResponse,
+  PatchAnimalPhotoRequest,
 } from '../types'
 import { api } from './api'
 
@@ -31,6 +32,26 @@ export async function createAnimalPhoto(
   request: CreateAnimalPhotoRequest,
 ): Promise<AnimalPhotoResponse> {
   const response = await api.post<AnimalPhotoResponse>('/animal-photos', request)
+
+  return response.data
+}
+
+export async function patchAnimalPhoto(
+  id: number,
+  request: PatchAnimalPhotoRequest,
+): Promise<AnimalPhotoResponse> {
+  const response = await api.patch<AnimalPhotoResponse>(
+    `/animal-photos/${id}`,
+    request,
+  )
+
+  return response.data
+}
+
+export async function deleteAnimalPhoto(
+  id: number,
+): Promise<AnimalPhotoResponse> {
+  const response = await api.delete<AnimalPhotoResponse>(`/animal-photos/${id}`)
 
   return response.data
 }
