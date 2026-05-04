@@ -1,16 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;500;600&display=swap');
+
 :root {
-  --color-background: #f6f7f9;
+  --color-background: #faf7f2;
   --color-surface: #ffffff;
-  --color-border: #d9dee7;
-  --color-text: #4b5563;
-  --color-text-strong: #111827;
-  --color-primary: #2563eb;
+  --color-surface-muted: #f3efe8;
+  --color-surface-raised: #fffaf3;
+  --color-border: #e4ddd3;
+  --color-text: #62675f;
+  --color-text-muted: #8a8f86;
+  --color-text-strong: #232820;
+  --color-primary: #4f9f6e;
+  --color-primary-hover: #3f875d;
+  --color-warning: #d99a2b;
+  --color-error: #d95f5f;
+  --color-accent: #f2b880;
+  --shadow-soft: 0 14px 34px rgba(79, 66, 48, 0.08);
+  --shadow-medium: 0 18px 44px rgba(79, 66, 48, 0.13);
+  --shadow-green: 0 16px 34px rgba(79, 159, 110, 0.18);
 
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     'Segoe UI', sans-serif;
   color: var(--color-text);
   background: var(--color-background);
+  color-scheme: light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -21,10 +34,17 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
+  background:
+    url('../background.png') center top / cover no-repeat fixed,
+    var(--color-background);
 }
 
 button,
@@ -43,11 +63,13 @@ p {
 
 h1 {
   color: var(--color-text-strong);
-  font-size: clamp(32px, 5vw, 48px);
-  line-height: 1.08;
+  font-size: clamp(30px, 4vw, 42px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0;
 }
 
 p {
-  font-size: 17px;
-  line-height: 1.65;
+  font-size: 14px;
+  line-height: 1.6;
 }

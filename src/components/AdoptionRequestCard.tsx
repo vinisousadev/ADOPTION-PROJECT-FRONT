@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import type { AdoptionRequestResponse } from '../types'
 import {
   formatAdoptionRequestStatus,
@@ -51,7 +52,15 @@ export function AdoptionRequestCard({
         <p>{request.message || 'Sem mensagem informada.'}</p>
       </div>
 
-      {children && <div className="actions">{children}</div>}
+      <div className="actions request-card__actions">
+        <div className="request-card__decision-actions">{children}</div>
+        <Link
+          className="button button--secondary"
+          to={`/animals/${request.animalId}`}
+        >
+          Ver detalhes
+        </Link>
+      </div>
     </article>
   )
 }

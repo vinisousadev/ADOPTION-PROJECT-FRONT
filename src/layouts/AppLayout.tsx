@@ -27,6 +27,7 @@ export function AppLayout() {
                 <NavLink to="/my-animals">Meus animais</NavLink>
                 <NavLink to="/my-adoption-requests">Meus pedidos</NavLink>
                 <NavLink to="/received-adoption-requests">Recebidos</NavLink>
+                <NavLink to="/profile">Perfil</NavLink>
                 <div className="session-summary">
                   <span>
                     {user.name} - {user.userType}
@@ -37,10 +38,7 @@ export function AppLayout() {
                 </div>
               </>
             ) : (
-              <>
-                <NavLink to="/login">Login</NavLink>
-                <NavLink to="/register">Cadastro</NavLink>
-              </>
+              <NavLink to="/login">Login</NavLink>
             )}
           </nav>
         </div>

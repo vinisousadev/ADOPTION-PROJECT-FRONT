@@ -9,6 +9,7 @@ import { LoginPage } from '../pages/LoginPage'
 import { MyAnimalsPage } from '../pages/MyAnimalsPage'
 import { MyAdoptionRequestsPage } from '../pages/MyAdoptionRequestsPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
+import { ProfilePage } from '../pages/ProfilePage'
 import { ReceivedAdoptionRequestsPage } from '../pages/ReceivedAdoptionRequestsPage'
 import { RegisterPage } from '../pages/RegisterPage'
 import { ProtectedRoute } from './ProtectedRoute'
@@ -25,6 +26,7 @@ export function AppRoutes() {
         <Route element={<ProtectedRoute />}>
           <Route path="animals/new" element={<CreateAnimalPage />} />
           <Route path="animals/:id/edit" element={<EditAnimalPage />} />
+          <Route path="profile" element={<ProfilePage />} />
           <Route path="my-animals" element={<MyAnimalsPage />} />
           <Route path="my-adoption-requests" element={<MyAdoptionRequestsPage />} />
           <Route

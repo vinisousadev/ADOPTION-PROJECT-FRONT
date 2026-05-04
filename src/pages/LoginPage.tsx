@@ -72,6 +72,9 @@ export function LoginPage() {
           <button className="button" type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Entrando...' : 'Entrar'}
           </button>
+          <Link className="button button--secondary" to="/register">
+            Registre-se
+          </Link>
           <Link className="button button--secondary" to="/">
             Voltar
           </Link>

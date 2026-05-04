@@ -8,3 +8,9 @@ export async function createUser(
 
   return response.data
 }
+
+export async function getUserById(id: number): Promise<UserResponse> {
+  const response = await api.get<UserResponse>(`/users/${id}`)
+
+  return response.data
+}
