@@ -19,5 +19,11 @@ export type {
   CreateAnimalPhotoRequest,
   PatchAnimalPhotoRequest,
 } from './animalPhoto'
+export type {
+  CreateFeedPostRequest,
+  FeedPostResponse,
+  FeedPostType,
+  PatchFeedPostRequest,
+} from './feedPost'
 export type { ApiErrorResponse, PageMetadata, PagedResponse } from './api'
 export type { BrazilianCity, BrazilianState } from './location'

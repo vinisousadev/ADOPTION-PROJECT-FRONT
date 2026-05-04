@@ -1,9 +1,11 @@
 import { Route, Routes } from 'react-router-dom'
 import { AppLayout } from '../layouts/AppLayout'
 import { AnimalDetailsPage } from '../pages/AnimalDetailsPage'
+import { AnimalAreaPage } from '../pages/AnimalAreaPage'
 import { AnimalsPage } from '../pages/AnimalsPage'
 import { CreateAnimalPage } from '../pages/CreateAnimalPage'
 import { EditAnimalPage } from '../pages/EditAnimalPage'
+import { FeedPage } from '../pages/FeedPage'
 import { HomePage } from '../pages/HomePage'
 import { LoginPage } from '../pages/LoginPage'
 import { MyAnimalsPage } from '../pages/MyAnimalsPage'
@@ -24,6 +26,8 @@ export function AppRoutes() {
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
         <Route element={<ProtectedRoute />}>
+          <Route path="feed" element={<FeedPage />} />
+          <Route path="animal-area" element={<AnimalAreaPage />} />
           <Route path="animals/new" element={<CreateAnimalPage />} />
           <Route path="animals/:id/edit" element={<EditAnimalPage />} />
           <Route path="profile" element={<ProfilePage />} />

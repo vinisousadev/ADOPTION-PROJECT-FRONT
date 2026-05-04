@@ -4,12 +4,16 @@ import type { Area, Point } from 'react-easy-crop'
 
 type ImageCropperProps = {
   imageSrc: string
+  aspect?: number
+  confirmLabel?: string
   onCancel: () => void
   onConfirm: (croppedAreaPixels: Area) => void
 }
 
 export function ImageCropper({
   imageSrc,
+  aspect = 4 / 3,
+  confirmLabel = 'Usar recorte',
   onCancel,
   onConfirm,
 }: ImageCropperProps) {
@@ -24,7 +28,7 @@ export function ImageCropper({
           image={imageSrc}
           crop={crop}
           zoom={zoom}
-          aspect={4 / 3}
+          aspect={aspect}
           onCropChange={setCrop}
           onZoomChange={setZoom}
           onCropComplete={(_, areaPixels) => setCroppedAreaPixels(areaPixels)}
@@ -54,7 +58,7 @@ export function ImageCropper({
             }
           }}
         >
-          Usar recorte
+          {confirmLabel}
         </button>
         <button className="button button--secondary" type="button" onClick={onCancel}>
           Cancelar

@@ -18,6 +18,7 @@ export type UserResponse = {
   email: string
   city?: string
   state?: string
+  profilePhotoUrl?: string
   registrationDate: string
   userType: UserType
 }
