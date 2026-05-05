@@ -1,8 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import {
+  getNotifications,
+  getUnreadNotificationCount,
+  markAllNotificationsAsRead,
+  markNotificationAsRead,
+} from '../services/notificationService'
 import { getUserById } from '../services/userService'
-import type { UserResponse } from '../types'
+import type { NotificationResponse, UserResponse } from '../types'
 import adotLogoUrl from '../assets/adot-logo.png'
 import adotLogoTextUrl from '../assets/adot-logo-text.png'
 
@@ -69,6 +75,15 @@ function MoonIcon() {
   )
 }
 
+function BellIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 8h18c0-1-3-1-3-8" />
+      <path d="M10 20a2 2 0 0 0 4 0" />
+    </svg>
+  )
+}
+
 function getInitials(name: string) {
   return name
     .split(' ')
@@ -82,7 +97,12 @@ function getInitials(name: string) {
 export function AppLayout() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
+  const notificationMenuRef = useRef<HTMLDivElement | null>(null)
+  const userMenuRef = useRef<HTMLDivElement | null>(null)
+  const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [notifications, setNotifications] = useState<NotificationResponse[]>([])
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
   const [profile, setProfile] = useState<UserResponse | null>(null)
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const storedTheme = localStorage.getItem('adot:theme')
@@ -98,6 +118,8 @@ export function AppLayout() {
   useEffect(() => {
     if (!user) {
       setProfile(null)
+      setNotifications([])
+      setUnreadNotificationCount(0)
       return
     }
 
@@ -115,6 +137,59 @@ export function AppLayout() {
     loadProfile()
   }, [user])
 
+  useEffect(() => {
+    if (!user) {
+      return
+    }
+
+    async function loadNotifications() {
+      try {
+        const [notificationsResponse, unreadCount] = await Promise.all([
+          getNotifications(),
+          getUnreadNotificationCount(),
+        ])
+
+        setNotifications(notificationsResponse.content)
+        setUnreadNotificationCount(unreadCount)
+      } catch {
+        setNotifications([])
+        setUnreadNotificationCount(0)
+      }
+    }
+
+    loadNotifications()
+
+    const intervalId = window.setInterval(loadNotifications, 45000)
+
+    return () => window.clearInterval(intervalId)
+  }, [user])
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsUserMenuOpen(false)
+      }
+
+      if (
+        notificationMenuRef.current &&
+        !notificationMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsNotificationMenuOpen(false)
+      }
+    }
+
+    if (isUserMenuOpen || isNotificationMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isUserMenuOpen, isNotificationMenuOpen])
+
   function handleLogout() {
     logout()
     setIsUserMenuOpen(false)
@@ -123,6 +198,40 @@ export function AppLayout() {
 
   function toggleTheme() {
     setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'))
+  }
+
+  async function handleNotificationClick(notification: NotificationResponse) {
+    try {
+      if (!notification.read) {
+        await markNotificationAsRead(notification.id)
+        setUnreadNotificationCount((currentCount) => Math.max(currentCount - 1, 0))
+        setNotifications((currentNotifications) =>
+          currentNotifications.map((currentNotification) =>
+            currentNotification.id === notification.id
+              ? { ...currentNotification, read: true, readAt: new Date().toISOString() }
+              : currentNotification,
+          ),
+        )
+      }
+    } finally {
+      setIsNotificationMenuOpen(false)
+
+      if (notification.actionUrl) {
+        navigate(notification.actionUrl)
+      }
+    }
+  }
+
+  async function handleMarkAllNotificationsAsRead() {
+    await markAllNotificationsAsRead()
+    setUnreadNotificationCount(0)
+    setNotifications((currentNotifications) =>
+      currentNotifications.map((notification) => ({
+        ...notification,
+        read: true,
+        readAt: notification.readAt ?? new Date().toISOString(),
+      })),
+    )
   }
 
   const profilePhotoUrl = profile?.profilePhotoUrl
@@ -191,7 +300,78 @@ export function AppLayout() {
             </button>
 
             {user ? (
-              <div className="user-menu">
+              <div
+                ref={notificationMenuRef}
+                className="notification-menu"
+              >
+                <button
+                  className="notification-menu__trigger"
+                  type="button"
+                  onClick={() =>
+                    setIsNotificationMenuOpen((currentValue) => !currentValue)
+                  }
+                  aria-expanded={isNotificationMenuOpen}
+                  aria-haspopup="menu"
+                  aria-label="Abrir notificacoes"
+                >
+                  <BellIcon />
+                  {unreadNotificationCount > 0 && (
+                    <span className="notification-menu__badge">
+                      {unreadNotificationCount > 9
+                        ? '9+'
+                        : unreadNotificationCount}
+                    </span>
+                  )}
+                </button>
+
+                {isNotificationMenuOpen && (
+                  <div className="notification-menu__dropdown" role="menu">
+                    <div className="notification-menu__header">
+                      <strong>Notificacoes</strong>
+                      {unreadNotificationCount > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleMarkAllNotificationsAsRead}
+                        >
+                          Marcar lidas
+                        </button>
+                      )}
+                    </div>
+
+                    {notifications.length > 0 ? (
+                      <div className="notification-menu__list">
+                        {notifications.map((notification) => (
+                          <button
+                            className={
+                              notification.read
+                                ? 'notification-menu__item'
+                                : 'notification-menu__item notification-menu__item--unread'
+                            }
+                            key={notification.id}
+                            type="button"
+                            role="menuitem"
+                            onClick={() => handleNotificationClick(notification)}
+                          >
+                            <strong>{notification.title}</strong>
+                            <span>{notification.message}</span>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="notification-menu__empty">
+                        Nenhuma notificacao ainda.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : null}
+
+            {user ? (
+              <div
+                ref={userMenuRef}
+                className="user-menu"
+              >
                 <button
                   className="user-menu__trigger"
                   type="button"
@@ -223,6 +403,34 @@ export function AppLayout() {
                       onClick={() => setIsUserMenuOpen(false)}
                     >
                       Perfil
+                    </Link>
+                    <Link
+                      to="/animals/new"
+                      role="menuitem"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      Cadastrar animal
+                    </Link>
+                    <Link
+                      to="/my-animals"
+                      role="menuitem"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      Meus animais
+                    </Link>
+                    <Link
+                      to="/received-adoption-requests"
+                      role="menuitem"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      Pedidos recebidos
+                    </Link>
+                    <Link
+                      to="/my-adoption-requests"
+                      role="menuitem"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      Solicitacoes feitas
                     </Link>
                     <button type="button" role="menuitem" onClick={handleLogout}>
                       Sair

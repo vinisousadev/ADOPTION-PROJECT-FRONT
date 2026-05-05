@@ -1,5 +1,8 @@
 import type {
+  CreateFeedPostCommentRequest,
   CreateFeedPostRequest,
+  FeedPostCommentResponse,
+  FeedPostLikeResponse,
   FeedPostResponse,
   PatchFeedPostRequest,
   PagedResponse,
@@ -35,6 +38,51 @@ export async function uploadFeedPostPhoto(
         'Content-Type': 'multipart/form-data',
       },
     },
+  )
+
+  return response.data
+}
+
+export async function likeFeedPost(id: number): Promise<FeedPostLikeResponse> {
+  const response = await api.post<FeedPostLikeResponse>(
+    `/feed-posts/${id}/likes`,
+  )
+
+  return response.data
+}
+
+export async function unlikeFeedPost(
+  id: number,
+): Promise<FeedPostLikeResponse> {
+  const response = await api.delete<FeedPostLikeResponse>(
+    `/feed-posts/${id}/likes`,
+  )
+
+  return response.data
+}
+
+export async function getFeedPostComments(
+  id: number,
+  page = 0,
+  size = 5,
+): Promise<PagedResponse<FeedPostCommentResponse>> {
+  const response = await api.get<PagedResponse<FeedPostCommentResponse>>(
+    `/feed-posts/${id}/comments`,
+    {
+      params: { page, size },
+    },
+  )
+
+  return response.data
+}
+
+export async function createFeedPostComment(
+  id: number,
+  request: CreateFeedPostCommentRequest,
+): Promise<FeedPostCommentResponse> {
+  const response = await api.post<FeedPostCommentResponse>(
+    `/feed-posts/${id}/comments`,
+    request,
   )
 
   return response.data

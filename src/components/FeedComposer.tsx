@@ -1,6 +1,7 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import type { AnimalResponse } from '../types'
 import { getInitials } from '../utils/getInitials'
 
 function VideoIcon() {
@@ -25,14 +26,18 @@ function PhotoIcon() {
 type FeedComposerProps = {
   authorName: string
   profilePhotoUrl?: string
+  animals: AnimalResponse[]
   content: string
+  selectedAnimalId: number | null
   selectedPhotoPreview: string
   selectedVideoName: string
+  errorMessage: string
   isOpen: boolean
   isSubmitting: boolean
   onClose: () => void
   onContentChange: (value: string) => void
   onOpen: () => void
+  onAnimalSelect: (animalId: number | null) => void
   onPhotoChange: (file?: File) => void
   onRemovePhoto: () => void
   onSubmit: (event: FormEvent<HTMLFormElement>) => void
@@ -42,14 +47,18 @@ type FeedComposerProps = {
 export function FeedComposer({
   authorName,
   profilePhotoUrl,
+  animals,
   content,
+  selectedAnimalId,
   selectedPhotoPreview,
   selectedVideoName,
+  errorMessage,
   isOpen,
   isSubmitting,
   onClose,
   onContentChange,
   onOpen,
+  onAnimalSelect,
   onPhotoChange,
   onRemovePhoto,
   onSubmit,
@@ -57,6 +66,8 @@ export function FeedComposer({
 }: FeedComposerProps) {
   const photoInputRef = useRef<HTMLInputElement | null>(null)
   const videoInputRef = useRef<HTMLInputElement | null>(null)
+  const [isAnimalPickerOpen, setIsAnimalPickerOpen] = useState(false)
+  const selectedAnimal = animals.find((animal) => animal.id === selectedAnimalId)
 
   return (
     <>
@@ -137,7 +148,62 @@ export function FeedComposer({
               </p>
             )}
 
+            {selectedAnimal && (
+              <div className="feed-composer__selected-animal">
+                <span>Animal vinculado</span>
+                <strong>{selectedAnimal.animalName}</strong>
+                <button type="button" onClick={() => onAnimalSelect(null)}>
+                  Remover
+                </button>
+              </div>
+            )}
+
+            {errorMessage && <p className="form-error">{errorMessage}</p>}
+
             <div className="feed-composer-modal__media">
+              <div className="feed-animal-picker">
+                <button
+                  className="feed-media-button"
+                  type="button"
+                  disabled={animals.length === 0}
+                  onClick={() =>
+                    setIsAnimalPickerOpen((currentValue) => !currentValue)
+                  }
+                >
+                  Escolher animal
+                </button>
+
+                {isAnimalPickerOpen && animals.length > 0 && (
+                  <div className="feed-animal-picker__list">
+                    <button
+                      className={!selectedAnimalId ? 'is-selected' : ''}
+                      type="button"
+                      onClick={() => {
+                        onAnimalSelect(null)
+                        setIsAnimalPickerOpen(false)
+                      }}
+                    >
+                      Sem animal vinculado
+                    </button>
+                    {animals.map((animal) => (
+                      <button
+                        className={
+                          selectedAnimalId === animal.id ? 'is-selected' : ''
+                        }
+                        key={animal.id}
+                        type="button"
+                        onClick={() => {
+                          onAnimalSelect(animal.id)
+                          setIsAnimalPickerOpen(false)
+                        }}
+                      >
+                        <strong>{animal.animalName}</strong>
+                        <span>{animal.species}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <button
                 className="feed-media-button"
                 type="button"

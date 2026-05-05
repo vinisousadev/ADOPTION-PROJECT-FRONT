@@ -20,9 +20,13 @@ export type {
   PatchAnimalPhotoRequest,
 } from './animalPhoto'
 export type {
+  CreateFeedPostCommentRequest,
   CreateFeedPostRequest,
+  FeedPostCommentResponse,
+  FeedPostLikeResponse,
   FeedPostResponse,
   PatchFeedPostRequest,
 } from './feedPost'
+export type { NotificationResponse } from './notification'
 export type { ApiErrorResponse, PageMetadata, PagedResponse } from './api'
 export type { BrazilianCity, BrazilianState } from './location'

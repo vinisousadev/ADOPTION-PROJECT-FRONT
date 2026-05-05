@@ -6,6 +6,7 @@ import { FeedPostCard } from '../components/FeedPostCard'
 import { FeedProfileSidebar } from '../components/FeedProfileSidebar'
 import { ImageCropper } from '../components/ImageCropper'
 import { useAuth } from '../contexts/AuthContext'
+import { getMyAnimals } from '../services/animalService'
 import {
   createFeedPost,
   deleteFeedPost,
@@ -14,7 +15,7 @@ import {
   uploadFeedPostPhoto,
 } from '../services/feedPostService'
 import { getUserById } from '../services/userService'
-import type { FeedPostResponse, UserResponse } from '../types'
+import type { AnimalResponse, FeedPostResponse, UserResponse } from '../types'
 import { createCroppedImageFile } from '../utils/cropImage'
 import { getApiErrorMessage } from '../utils/getApiErrorMessage'
 
@@ -24,8 +25,10 @@ const ALLOWED_FEED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 export function FeedPage() {
   const { user } = useAuth()
   const [profile, setProfile] = useState<UserResponse | null>(null)
+  const [myAnimals, setMyAnimals] = useState<AnimalResponse[]>([])
   const [posts, setPosts] = useState<FeedPostResponse[]>([])
   const [content, setContent] = useState('')
+  const [selectedAnimalId, setSelectedAnimalId] = useState<number | null>(null)
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null)
   const [selectedPhotoPreview, setSelectedPhotoPreview] = useState('')
   const [photoToCrop, setPhotoToCrop] = useState<File | null>(null)
@@ -42,6 +45,9 @@ export function FeedPage() {
   const [updatingPostId, setUpdatingPostId] = useState<number | null>(null)
 
   const profilePhotoUrl = profile?.profilePhotoUrl
+  const availableAnimals = myAnimals.filter(
+    (animal) => animal.status === 'AVAILABLE',
+  )
 
   useEffect(() => {
     async function loadInitialData() {
@@ -68,10 +74,15 @@ export function FeedPage() {
 
     async function loadProfile() {
       try {
-        const userProfile = await getUserById(userId)
+        const [userProfile, myAnimalsResponse] = await Promise.all([
+          getUserById(userId),
+          getMyAnimals(),
+        ])
         setProfile(userProfile)
+        setMyAnimals(myAnimalsResponse.content)
       } catch {
         setProfile(null)
+        setMyAnimals([])
       }
     }
 
@@ -153,6 +164,7 @@ export function FeedPage() {
     setSelectedPhotoPreview('')
     setPhotoToCrop(null)
     setPhotoToCropPreview('')
+    setSelectedAnimalId(null)
     setSelectedVideoName('')
   }
 
@@ -175,6 +187,7 @@ export function FeedPage() {
     try {
       let createdPost = await createFeedPost({
         content: content.trim(),
+        animalId: selectedAnimalId ?? undefined,
       })
 
       if (selectedPhoto) {
@@ -265,21 +278,27 @@ export function FeedPage() {
           <FeedComposer
             authorName={user?.name ?? 'Usuario'}
             profilePhotoUrl={profilePhotoUrl}
+            animals={availableAnimals}
             content={content}
+            selectedAnimalId={selectedAnimalId}
             selectedPhotoPreview={selectedPhotoPreview}
             selectedVideoName={selectedVideoName}
+            errorMessage={isComposerOpen ? errorMessage : ''}
             isOpen={isComposerOpen}
             isSubmitting={isSubmitting}
             onClose={closeComposer}
             onContentChange={setContent}
             onOpen={() => setIsComposerOpen(true)}
+            onAnimalSelect={setSelectedAnimalId}
             onPhotoChange={handlePhotoChange}
             onRemovePhoto={() => setSelectedPhoto(null)}
             onSubmit={handleSubmit}
             onVideoChange={setSelectedVideoName}
           />
 
-          {errorMessage && <p className="form-error">{errorMessage}</p>}
+          {errorMessage && !isComposerOpen && (
+            <p className="form-error">{errorMessage}</p>
+          )}
           {successMessage && <p className="form-success">{successMessage}</p>}
           {isLoading && <p>Carregando feed...</p>}
 
@@ -301,6 +320,8 @@ export function FeedPage() {
                   key={post.id}
                   post={post}
                   currentUserId={user?.userId}
+                  currentUserName={user?.name}
+                  currentUserProfilePhotoUrl={profilePhotoUrl}
                   isEditing={editingPostId === post.id}
                   editingContent={editingContent}
                   isDeleting={deletingPostId === post.id}
