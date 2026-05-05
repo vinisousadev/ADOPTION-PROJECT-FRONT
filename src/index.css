@@ -37,7 +37,7 @@
     linear-gradient(180deg, rgba(250, 247, 242, 0.58), rgba(243, 239, 232, 0.5)),
     radial-gradient(ellipse at 8% 12%, rgba(242, 184, 128, 0.16), transparent 34%),
     radial-gradient(ellipse at 92% 4%, rgba(79, 159, 110, 0.13), transparent 30%),
-    url('../background.png') center top / cover fixed,
+    url('../lightmodebg.png') center top / cover fixed,
     var(--color-background);
 
   font-family:
@@ -53,40 +53,40 @@
 }
 
 :root[data-theme='dark'] {
-  --color-background: #151913;
-  --color-surface: #20261f;
-  --color-surface-muted: #2a3028;
-  --color-surface-raised: #252b24;
-  --color-border: #3d4639;
-  --color-text: #c4cbbd;
-  --color-text-muted: #939c8c;
-  --color-text-strong: #f3f7ef;
-  --color-primary: #78c894;
-  --color-primary-hover: #97ddb0;
+  --color-background: #0f1720;
+  --color-surface: #1b2733;
+  --color-surface-muted: #223140;
+  --color-surface-raised: #263747;
+  --color-border: #334657;
+  --color-text: #c8d0d8;
+  --color-text-muted: #94a3b1;
+  --color-text-strong: #edf2f7;
+  --color-primary: #f4f1ea;
+  --color-primary-hover: #ffffff;
   --color-warning: #e0b15d;
   --color-error: #ee8585;
-  --color-accent: #f0b679;
+  --color-accent: #f2b880;
   --shadow-soft:
-    0 12px 26px rgba(4, 8, 4, 0.28),
-    inset 0 1px 4px rgba(255, 255, 255, 0.08),
-    inset 0 -5px 12px rgba(0, 0, 0, 0.22);
+    0 14px 30px rgba(3, 8, 13, 0.28),
+    inset 0 1px 2px rgba(255, 255, 255, 0.04),
+    inset 0 -4px 10px rgba(0, 0, 0, 0.18);
   --shadow-medium:
-    0 18px 42px rgba(4, 8, 4, 0.34),
-    inset 0 2px 5px rgba(255, 255, 255, 0.08),
-    inset 0 -7px 14px rgba(0, 0, 0, 0.24);
+    0 18px 42px rgba(3, 8, 13, 0.34),
+    inset 0 1px 2px rgba(255, 255, 255, 0.05),
+    inset 0 -6px 14px rgba(0, 0, 0, 0.2);
   --shadow-green:
-    0 14px 28px rgba(120, 200, 148, 0.18),
-    inset 0 2px 5px rgba(255, 255, 255, 0.12),
-    inset 0 -5px 10px rgba(37, 82, 54, 0.42);
+    0 14px 28px rgba(244, 241, 234, 0.12),
+    inset 0 1px 2px rgba(255, 255, 255, 0.14),
+    inset 0 -5px 10px rgba(12, 20, 28, 0.2);
   --shadow-pressed:
-    0 6px 16px rgba(4, 8, 4, 0.28),
-    inset 0 4px 12px rgba(0, 0, 0, 0.24),
+    0 6px 16px rgba(3, 8, 13, 0.26),
+    inset 0 4px 12px rgba(0, 0, 0, 0.2),
     inset 0 -1px 3px rgba(255, 255, 255, 0.03);
   --background-layer:
-    linear-gradient(180deg, rgba(12, 16, 11, 0.78), rgba(21, 25, 19, 0.84)),
-    radial-gradient(ellipse at 8% 12%, rgba(242, 184, 128, 0.1), transparent 34%),
-    radial-gradient(ellipse at 92% 4%, rgba(120, 200, 148, 0.13), transparent 30%),
-    url('../background.png') center top / cover fixed,
+    linear-gradient(180deg, rgba(15, 23, 32, 0.72), rgba(10, 16, 23, 0.82)),
+    radial-gradient(ellipse at 8% 12%, rgba(242, 184, 128, 0.08), transparent 34%),
+    radial-gradient(ellipse at 92% 4%, rgba(98, 103, 95, 0.18), transparent 30%),
+    url('../darkmodebg.png') center top / cover fixed,
     var(--color-background);
 
   color-scheme: dark;
