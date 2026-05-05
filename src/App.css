@@ -1664,6 +1664,7 @@
 .feed-page {
   display: grid;
   gap: 20px;
+
 }
 
 .feed-layout {
@@ -2201,7 +2202,7 @@
   width: 100%;
   aspect-ratio: 1 / 1;
   max-height: 430px;
-  border-radius: 6px;
+  border-radius: 10px;
   object-fit: cover;
   background: var(--color-surface-muted);
 }
@@ -2779,7 +2780,6 @@
 }
 
 .animal-card__photo,
-.feed-post__image,
 .feed-composer__preview img,
 .photo-gallery__item img {
   border-radius: 22px;
@@ -3101,7 +3101,7 @@
   }
 
   .app-main {
-    padding: 16px 0 32px;
+    padding: px 0 32px;
   }
 
   .home-hero {

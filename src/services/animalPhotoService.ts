@@ -36,6 +36,29 @@ export async function createAnimalPhoto(
   return response.data
 }
 
+export async function uploadAnimalPhoto(
+  animalId: number,
+  file: File,
+  isMain: 'Y' | 'N' = 'N',
+): Promise<AnimalPhotoResponse> {
+  const formData = new FormData()
+  formData.append('animalId', String(animalId))
+  formData.append('isMain', isMain)
+  formData.append('file', file)
+
+  const response = await api.post<AnimalPhotoResponse>(
+    '/animal-photos/upload',
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
+  )
+
+  return response.data
+}
+
 export async function patchAnimalPhoto(
   id: number,
   request: PatchAnimalPhotoRequest,

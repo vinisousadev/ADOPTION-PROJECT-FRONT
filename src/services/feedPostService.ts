@@ -20,6 +20,26 @@ export async function createFeedPost(
   return response.data
 }
 
+export async function uploadFeedPostPhoto(
+  id: number,
+  file: File,
+): Promise<FeedPostResponse> {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const response = await api.post<FeedPostResponse>(
+    `/feed-posts/${id}/photo`,
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
+  )
+
+  return response.data
+}
+
 export async function patchFeedPost(
   id: number,
   request: PatchFeedPostRequest,

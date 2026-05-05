@@ -22,7 +22,6 @@ export type {
 export type {
   CreateFeedPostRequest,
   FeedPostResponse,
-  FeedPostType,
   PatchFeedPostRequest,
 } from './feedPost'
 export type { ApiErrorResponse, PageMetadata, PagedResponse } from './api'

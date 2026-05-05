@@ -4,12 +4,11 @@ import type { Area } from 'react-easy-crop'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ImageCropper } from '../components/ImageCropper'
 import {
-  createAnimalPhoto,
   deleteAnimalPhoto,
   getAnimalPhotos,
   patchAnimalPhoto,
+  uploadAnimalPhoto,
 } from '../services/animalPhotoService'
-import { uploadAnimalPhoto } from '../services/animalPhotoUploadService'
 import { getAnimalById, patchAnimal } from '../services/animalService'
 import type { AgeUnit, AnimalPhotoResponse, AnimalSex, YesNo } from '../types'
 import { createCroppedImageFile } from '../utils/cropImage'
@@ -253,12 +252,11 @@ export function EditAnimalPage() {
         originalPhotoName || 'animal-photo.jpg',
       )
 
-      const uploadedPhoto = await uploadAnimalPhoto(croppedFile)
-      const createdPhoto = await createAnimalPhoto({
+      const createdPhoto = await uploadAnimalPhoto(
         animalId,
-        photoUrl: uploadedPhoto.publicUrl,
-        isMain: photos.length === 0 ? 'Y' : 'N',
-      })
+        croppedFile,
+        photos.length === 0 ? 'Y' : 'N',
+      )
 
       setPhotos((currentPhotos) => [...currentPhotos, createdPhoto])
       clearCurrentCrop()

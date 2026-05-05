@@ -1,11 +1,3 @@
-import type { FeedPostType } from '../types'
-
-export const feedPostTypeLabels: Record<FeedPostType, string> = {
-  GENERAL: 'Atualizacao',
-  ADOPTION_SUCCESS: 'Adocao realizada',
-  ANIMAL_UPDATE: 'Noticia de animal',
-}
-
 export function formatFeedDate(value: string) {
   return new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit',

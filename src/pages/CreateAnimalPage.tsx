@@ -3,11 +3,7 @@ import type { FormEvent } from 'react'
 import type { Area } from 'react-easy-crop'
 import { Link } from 'react-router-dom'
 import { ImageCropper } from '../components/ImageCropper'
-import { createAnimalPhoto } from '../services/animalPhotoService'
-import {
-  removeUploadedAnimalPhoto,
-  uploadAnimalPhoto,
-} from '../services/animalPhotoUploadService'
+import { uploadAnimalPhoto } from '../services/animalPhotoService'
 import { createAnimal, deleteAnimal } from '../services/animalService'
 import type { AgeUnit, AnimalResponse, AnimalSex, YesNo } from '../types'
 import { createCroppedImageFile } from '../utils/cropImage'
@@ -216,20 +212,11 @@ export function CreateAnimalPage() {
     }
 
     setIsSubmitting(true)
-    const uploadedPhotoPaths: string[] = []
     let createdAnimal: AnimalResponse | null = null
 
     try {
       if (photoFiles.length === 0) {
         throw new Error('Envie uma foto principal do animal.')
-      }
-
-      const uploadedPhotos = []
-
-      for (const photoFile of photoFiles) {
-        const uploadedPhoto = await uploadAnimalPhoto(photoFile)
-        uploadedPhotoPaths.push(uploadedPhoto.filePath)
-        uploadedPhotos.push(uploadedPhoto)
       }
 
       createdAnimal = await createAnimal({
@@ -247,12 +234,12 @@ export function CreateAnimalPage() {
         description: form.description.trim() || undefined,
       })
 
-      for (const [index, uploadedPhoto] of uploadedPhotos.entries()) {
-        await createAnimalPhoto({
-          animalId: createdAnimal.id,
-          photoUrl: uploadedPhoto.publicUrl,
-          isMain: index === 0 ? 'Y' : 'N',
-        })
+      for (const [index, photoFile] of photoFiles.entries()) {
+        await uploadAnimalPhoto(
+          createdAnimal.id,
+          photoFile,
+          index === 0 ? 'Y' : 'N',
+        )
       }
 
       setForm(initialFormState)
@@ -267,14 +254,6 @@ export function CreateAnimalPage() {
             'Nao foi possivel salvar a foto do animal. O animal foi criado, mas nao conseguimos remove-lo automaticamente.',
           )
           return
-        }
-      }
-
-      for (const uploadedPhotoPath of uploadedPhotoPaths) {
-        try {
-          await removeUploadedAnimalPhoto(uploadedPhotoPath)
-        } catch {
-          // If cleanup fails, the user-facing error below is still the main action failure.
         }
       }
 

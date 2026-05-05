@@ -63,9 +63,9 @@ export function FeedPostCard({
   onSaveEditing,
 }: FeedPostCardProps) {
   const canManage = currentUserId === post.authorUserId
-  const [isLiked, setIsLiked] = useState(false)
+  const [isLiked, setIsLiked] = useState(post.likedByCurrentUser)
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false)
-  const likeCount = isLiked ? 1 : 0
+  const likeCount = post.likeCount + (isLiked && !post.likedByCurrentUser ? 1 : 0)
 
   return (
     <article className="feed-post">
@@ -85,7 +85,9 @@ export function FeedPostCard({
             ) : (
               <span>{post.authorName}</span>
             )}
-            <span className="feed-post__author-role">Protetor</span>
+            <span className="feed-post__author-role">
+              {post.authorRoleLabel === 'ONG' ? 'ONG' : 'Protetor'}
+            </span>
             <span>{formatFeedDate(post.createdAt)}</span>
           </div>
 
@@ -152,7 +154,7 @@ export function FeedPostCard({
 
             <div className="feed-post__social-summary">
               <span>{likeCount} curtidas</span>
-              <span>0 comentarios</span>
+              <span>{post.commentCount} comentarios</span>
             </div>
 
             <div className="feed-post__social-actions">

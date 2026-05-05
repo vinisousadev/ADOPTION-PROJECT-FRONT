@@ -1,24 +1,20 @@
-export type FeedPostType = 'GENERAL' | 'ADOPTION_SUCCESS' | 'ANIMAL_UPDATE'
-
 export type FeedPostResponse = {
   id: number
   authorUserId: number
   authorName: string
   authorProfilePhotoUrl?: string
-  animalId?: number
-  animalName?: string
-  animalSpecies?: string
+  authorRoleLabel?: string
   content: string
   imageUrl?: string
-  postType: FeedPostType
+  videoUrl?: string
   createdAt: string
+  likeCount: number
+  commentCount: number
+  likedByCurrentUser: boolean
 }
 
 export type CreateFeedPostRequest = {
-  animalId?: number
   content: string
-  imageUrl?: string
-  postType?: FeedPostType
 }
 
 export type PatchFeedPostRequest = Partial<CreateFeedPostRequest>

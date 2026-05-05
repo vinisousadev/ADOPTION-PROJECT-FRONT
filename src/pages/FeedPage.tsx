@@ -11,10 +11,10 @@ import {
   deleteFeedPost,
   getFeedPosts,
   patchFeedPost,
+  uploadFeedPostPhoto,
 } from '../services/feedPostService'
-import { uploadFeedPostPhoto } from '../services/feedPostPhotoUploadService'
 import { getUserById } from '../services/userService'
-import type { FeedPostResponse, FeedPostType, UserResponse } from '../types'
+import type { FeedPostResponse, UserResponse } from '../types'
 import { createCroppedImageFile } from '../utils/cropImage'
 import { getApiErrorMessage } from '../utils/getApiErrorMessage'
 
@@ -26,7 +26,6 @@ export function FeedPage() {
   const [profile, setProfile] = useState<UserResponse | null>(null)
   const [posts, setPosts] = useState<FeedPostResponse[]>([])
   const [content, setContent] = useState('')
-  const [postType, setPostType] = useState<FeedPostType>('GENERAL')
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null)
   const [selectedPhotoPreview, setSelectedPhotoPreview] = useState('')
   const [photoToCrop, setPhotoToCrop] = useState<File | null>(null)
@@ -35,7 +34,6 @@ export function FeedPage() {
   const [isComposerOpen, setIsComposerOpen] = useState(false)
   const [editingPostId, setEditingPostId] = useState<number | null>(null)
   const [editingContent, setEditingContent] = useState('')
-  const [editingPostType, setEditingPostType] = useState<FeedPostType>('GENERAL')
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -151,7 +149,6 @@ export function FeedPage() {
 
   function clearComposer() {
     setContent('')
-    setPostType('GENERAL')
     setSelectedPhoto(null)
     setSelectedPhotoPreview('')
     setPhotoToCrop(null)
@@ -176,15 +173,13 @@ export function FeedPage() {
     setIsSubmitting(true)
 
     try {
-      const uploadedPhoto = selectedPhoto
-        ? await uploadFeedPostPhoto(selectedPhoto)
-        : null
-
-      const createdPost = await createFeedPost({
+      let createdPost = await createFeedPost({
         content: content.trim(),
-        imageUrl: uploadedPhoto?.publicUrl,
-        postType,
       })
+
+      if (selectedPhoto) {
+        createdPost = await uploadFeedPostPhoto(createdPost.id, selectedPhoto)
+      }
 
       setPosts((currentPosts) => [createdPost, ...currentPosts])
       clearComposer()
@@ -200,7 +195,6 @@ export function FeedPage() {
   function startEditingPost(post: FeedPostResponse) {
     setEditingPostId(post.id)
     setEditingContent(post.content)
-    setEditingPostType(post.postType)
     setErrorMessage('')
     setSuccessMessage('')
   }
@@ -208,7 +202,6 @@ export function FeedPage() {
   function cancelEditingPost() {
     setEditingPostId(null)
     setEditingContent('')
-    setEditingPostType('GENERAL')
   }
 
   async function handleUpdatePost(postId: number) {
@@ -225,7 +218,6 @@ export function FeedPage() {
     try {
       const updatedPost = await patchFeedPost(postId, {
         content: editingContent.trim(),
-        postType: editingPostType,
       })
 
       setPosts((currentPosts) =>
