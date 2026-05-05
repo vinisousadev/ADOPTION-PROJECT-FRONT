@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import type { Area } from 'react-easy-crop'
+import { FeedComposer } from '../components/FeedComposer'
+import { FeedPostCard } from '../components/FeedPostCard'
+import { FeedProfileSidebar } from '../components/FeedProfileSidebar'
+import { ImageCropper } from '../components/ImageCropper'
 import { useAuth } from '../contexts/AuthContext'
-import { getAvailableAnimals, getMyAnimals } from '../services/animalService'
 import {
   createFeedPost,
   deleteFeedPost,
@@ -11,64 +14,28 @@ import {
 } from '../services/feedPostService'
 import { uploadFeedPostPhoto } from '../services/feedPostPhotoUploadService'
 import { getUserById } from '../services/userService'
-import type { AnimalResponse, FeedPostResponse, FeedPostType, UserResponse } from '../types'
+import type { FeedPostResponse, FeedPostType, UserResponse } from '../types'
+import { createCroppedImageFile } from '../utils/cropImage'
 import { getApiErrorMessage } from '../utils/getApiErrorMessage'
 
 const MAX_FEED_PHOTO_SIZE = 4 * 1024 * 1024
 const ALLOWED_FEED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
-const postTypeLabels: Record<FeedPostType, string> = {
-  GENERAL: 'Atualizacao',
-  ADOPTION_SUCCESS: 'Adocao realizada',
-  ANIMAL_UPDATE: 'Noticia de animal',
-}
-
-function formatFeedDate(value: string) {
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(value))
-}
-
-function getInitials(name: string) {
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase()
-}
-
-function mergeAnimals(...animalGroups: AnimalResponse[][]) {
-  const animalsById = new Map<number, AnimalResponse>()
-
-  animalGroups.flat().forEach((animal) => {
-    animalsById.set(animal.id, animal)
-  })
-
-  return Array.from(animalsById.values()).sort((firstAnimal, secondAnimal) =>
-    firstAnimal.animalName.localeCompare(secondAnimal.animalName),
-  )
-}
-
 export function FeedPage() {
   const { user } = useAuth()
   const [profile, setProfile] = useState<UserResponse | null>(null)
   const [posts, setPosts] = useState<FeedPostResponse[]>([])
-  const [animals, setAnimals] = useState<AnimalResponse[]>([])
   const [content, setContent] = useState('')
   const [postType, setPostType] = useState<FeedPostType>('GENERAL')
-  const [selectedAnimalId, setSelectedAnimalId] = useState('')
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null)
   const [selectedPhotoPreview, setSelectedPhotoPreview] = useState('')
+  const [photoToCrop, setPhotoToCrop] = useState<File | null>(null)
+  const [photoToCropPreview, setPhotoToCropPreview] = useState('')
+  const [selectedVideoName, setSelectedVideoName] = useState('')
+  const [isComposerOpen, setIsComposerOpen] = useState(false)
   const [editingPostId, setEditingPostId] = useState<number | null>(null)
   const [editingContent, setEditingContent] = useState('')
   const [editingPostType, setEditingPostType] = useState<FeedPostType>('GENERAL')
-  const [editingAnimalId, setEditingAnimalId] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -78,27 +45,11 @@ export function FeedPage() {
 
   const profilePhotoUrl = profile?.profilePhotoUrl
 
-  const selectedAnimalIdNumber = useMemo(() => {
-    return selectedAnimalId ? Number(selectedAnimalId) : undefined
-  }, [selectedAnimalId])
-
   useEffect(() => {
     async function loadInitialData() {
       try {
-        const [postsResponse, availableAnimalsResponse, myAnimalsResponse] =
-          await Promise.all([
-            getFeedPosts(),
-            getAvailableAnimals(),
-            getMyAnimals().catch(() => null),
-          ])
-
+        const postsResponse = await getFeedPosts()
         setPosts(postsResponse.content)
-        setAnimals(
-          mergeAnimals(
-            availableAnimalsResponse.content,
-            myAnimalsResponse?.content ?? [],
-          ),
-        )
       } catch (error) {
         setErrorMessage(getApiErrorMessage(error))
       } finally {
@@ -141,6 +92,18 @@ export function FeedPage() {
     return () => URL.revokeObjectURL(previewUrl)
   }, [selectedPhoto])
 
+  useEffect(() => {
+    if (!photoToCrop) {
+      setPhotoToCropPreview('')
+      return
+    }
+
+    const previewUrl = URL.createObjectURL(photoToCrop)
+    setPhotoToCropPreview(previewUrl)
+
+    return () => URL.revokeObjectURL(previewUrl)
+  }, [photoToCrop])
+
   function handlePhotoChange(file?: File) {
     setErrorMessage('')
 
@@ -159,15 +122,45 @@ export function FeedPage() {
       return
     }
 
-    setSelectedPhoto(file)
+    setPhotoToCrop(file)
+  }
+
+  function cancelPhotoCrop() {
+    setPhotoToCrop(null)
+    setPhotoToCropPreview('')
+  }
+
+  async function confirmPhotoCrop(croppedAreaPixels: Area) {
+    if (!photoToCrop || !photoToCropPreview) {
+      return
+    }
+
+    try {
+      const croppedPhoto = await createCroppedImageFile(
+        photoToCropPreview,
+        croppedAreaPixels,
+        photoToCrop.name || 'feed-photo.jpg',
+      )
+
+      setSelectedPhoto(croppedPhoto)
+      cancelPhotoCrop()
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error))
+    }
   }
 
   function clearComposer() {
     setContent('')
     setPostType('GENERAL')
-    setSelectedAnimalId('')
     setSelectedPhoto(null)
     setSelectedPhotoPreview('')
+    setPhotoToCrop(null)
+    setPhotoToCropPreview('')
+    setSelectedVideoName('')
+  }
+
+  function closeComposer() {
+    setIsComposerOpen(false)
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -188,7 +181,6 @@ export function FeedPage() {
         : null
 
       const createdPost = await createFeedPost({
-        animalId: selectedAnimalIdNumber,
         content: content.trim(),
         imageUrl: uploadedPhoto?.publicUrl,
         postType,
@@ -196,6 +188,7 @@ export function FeedPage() {
 
       setPosts((currentPosts) => [createdPost, ...currentPosts])
       clearComposer()
+      closeComposer()
       setSuccessMessage('Publicacao criada com sucesso.')
     } catch (error) {
       setErrorMessage(getApiErrorMessage(error))
@@ -208,7 +201,6 @@ export function FeedPage() {
     setEditingPostId(post.id)
     setEditingContent(post.content)
     setEditingPostType(post.postType)
-    setEditingAnimalId(post.animalId ? String(post.animalId) : '')
     setErrorMessage('')
     setSuccessMessage('')
   }
@@ -217,7 +209,6 @@ export function FeedPage() {
     setEditingPostId(null)
     setEditingContent('')
     setEditingPostType('GENERAL')
-    setEditingAnimalId('')
   }
 
   async function handleUpdatePost(postId: number) {
@@ -233,7 +224,6 @@ export function FeedPage() {
 
     try {
       const updatedPost = await patchFeedPost(postId, {
-        animalId: editingAnimalId ? Number(editingAnimalId) : undefined,
         content: editingContent.trim(),
         postType: editingPostType,
       })
@@ -276,272 +266,91 @@ export function FeedPage() {
 
   return (
     <section className="feed-page">
-      <div className="page">
-        <div>
-          <p className="eyebrow">Comunidade</p>
-          <h1>Feed</h1>
-        </div>
+      <div className="feed-layout">
+        <FeedProfileSidebar user={user} profile={profile} postCount={posts.length} />
 
-        <p>
-          Compartilhe novidades, historinhas de adocao e atualizacoes dos
-          animais com outros tutores.
-        </p>
+        <div className="feed-main-column">
+          <FeedComposer
+            authorName={user?.name ?? 'Usuario'}
+            profilePhotoUrl={profilePhotoUrl}
+            content={content}
+            selectedPhotoPreview={selectedPhotoPreview}
+            selectedVideoName={selectedVideoName}
+            isOpen={isComposerOpen}
+            isSubmitting={isSubmitting}
+            onClose={closeComposer}
+            onContentChange={setContent}
+            onOpen={() => setIsComposerOpen(true)}
+            onPhotoChange={handlePhotoChange}
+            onRemovePhoto={() => setSelectedPhoto(null)}
+            onSubmit={handleSubmit}
+            onVideoChange={setSelectedVideoName}
+          />
+
+          {errorMessage && <p className="form-error">{errorMessage}</p>}
+          {successMessage && <p className="form-success">{successMessage}</p>}
+          {isLoading && <p>Carregando feed...</p>}
+
+          {!isLoading && !errorMessage && posts.length === 0 && (
+            <div className="feed-empty-state">
+              <span>Feed vazio</span>
+              <h2>Compartilhe a primeira novidade</h2>
+              <p>
+                Publique uma atualizacao, uma foto ou uma historia de adocao
+                para movimentar a comunidade.
+              </p>
+            </div>
+          )}
+
+          {posts.length > 0 && (
+            <div className="feed-list">
+              {posts.map((post) => (
+                <FeedPostCard
+                  key={post.id}
+                  post={post}
+                  currentUserId={user?.userId}
+                  isEditing={editingPostId === post.id}
+                  editingContent={editingContent}
+                  isDeleting={deletingPostId === post.id}
+                  isSaving={updatingPostId === post.id}
+                  onCancelEditing={cancelEditingPost}
+                  onDelete={handleDeletePost}
+                  onEdit={startEditingPost}
+                  onEditingContentChange={setEditingContent}
+                  onSaveEditing={handleUpdatePost}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      <form className="feed-composer" onSubmit={handleSubmit}>
-        <div className="feed-composer__avatar">
-          {profilePhotoUrl ? (
-            <img src={profilePhotoUrl} alt="" />
-          ) : (
-            <span>{getInitials(user?.name ?? 'U')}</span>
-          )}
-        </div>
-
-        <div className="feed-composer__body">
-          <div className="form-field">
-            <label htmlFor="feed-content">Nova publicacao</label>
-            <textarea
-              id="feed-content"
-              value={content}
-              onChange={(event) => setContent(event.target.value)}
-              placeholder="Conte uma novidade sobre um animal, uma adocao ou uma conquista..."
-              maxLength={1000}
-              required
-            />
-          </div>
-
-          <div className="feed-composer__actions feed-composer__actions--wide">
-            <div className="form-field">
-              <label htmlFor="feed-post-type">Tipo</label>
-              <select
-                id="feed-post-type"
-                value={postType}
-                onChange={(event) =>
-                  setPostType(event.target.value as FeedPostType)
-                }
+      {photoToCropPreview && (
+        <div className="modal-backdrop">
+          <div className="feed-photo-crop-modal">
+            <div className="profile-photo-modal__header">
+              <div>
+                <h2>Ajustar foto do post</h2>
+                <p>Recorte a imagem para ela encaixar melhor no feed.</p>
+              </div>
+              <button
+                className="terms-modal__close"
+                type="button"
+                onClick={cancelPhotoCrop}
+                aria-label="Fechar"
               >
-                <option value="GENERAL">Atualizacao</option>
-                <option value="ADOPTION_SUCCESS">Adocao realizada</option>
-                <option value="ANIMAL_UPDATE">Noticia de animal</option>
-              </select>
-            </div>
-
-            <div className="form-field">
-              <label htmlFor="feed-animal">Animal vinculado</label>
-              <select
-                id="feed-animal"
-                value={selectedAnimalId}
-                onChange={(event) => setSelectedAnimalId(event.target.value)}
-              >
-                <option value="">Nenhum animal</option>
-                {animals.map((animal) => (
-                  <option key={animal.id} value={animal.id}>
-                    {animal.animalName} - {animal.species}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-field">
-              <label htmlFor="feed-photo">Foto</label>
-              <input
-                id="feed-photo"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={(event) => handlePhotoChange(event.target.files?.[0])}
-              />
-            </div>
-
-            <button className="button" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Publicando...' : 'Publicar'}
-            </button>
-          </div>
-
-          {selectedPhotoPreview && (
-            <div className="feed-composer__preview">
-              <img src={selectedPhotoPreview} alt="" />
-              <button type="button" onClick={() => setSelectedPhoto(null)}>
-                Remover foto
+                x
               </button>
             </div>
-          )}
-        </div>
-      </form>
 
-      {errorMessage && <p className="form-error">{errorMessage}</p>}
-      {successMessage && <p className="form-success">{successMessage}</p>}
-      {isLoading && <p>Carregando feed...</p>}
-
-      {!isLoading && !errorMessage && posts.length === 0 && (
-        <div className="feed-empty-state">
-          <span>Feed vazio</span>
-          <h2>Compartilhe a primeira novidade</h2>
-          <p>
-            Publique uma atualizacao, uma foto ou uma historia de adocao para
-            movimentar a comunidade.
-          </p>
-        </div>
-      )}
-
-      {posts.length > 0 && (
-        <div className="feed-list">
-          {posts.map((post) => {
-            const canManage = user?.userId === post.authorUserId
-            const isEditing = editingPostId === post.id
-
-            return (
-              <article className="feed-post" key={post.id}>
-                <div className="feed-post__avatar">
-                  {post.authorProfilePhotoUrl ? (
-                    <img src={post.authorProfilePhotoUrl} alt="" />
-                  ) : (
-                    <span>{getInitials(post.authorName)}</span>
-                  )}
-                </div>
-
-                <div className="feed-post__content">
-                  <header className="feed-post__header">
-                    <div>
-                      {post.authorUserId === user?.userId ? (
-                        <Link to="/profile">{post.authorName}</Link>
-                      ) : (
-                        <span>{post.authorName}</span>
-                      )}
-                      <span>{formatFeedDate(post.createdAt)}</span>
-                    </div>
-
-                    <strong>{postTypeLabels[post.postType]}</strong>
-                  </header>
-
-                  {isEditing ? (
-                    <div className="feed-post__editor">
-                      <div className="form-field">
-                        <label htmlFor={`feed-edit-content-${post.id}`}>
-                          Texto
-                        </label>
-                        <textarea
-                          id={`feed-edit-content-${post.id}`}
-                          value={editingContent}
-                          onChange={(event) =>
-                            setEditingContent(event.target.value)
-                          }
-                          maxLength={1000}
-                        />
-                      </div>
-
-                      <div className="feed-post__editor-grid">
-                        <div className="form-field">
-                          <label htmlFor={`feed-edit-type-${post.id}`}>
-                            Tipo
-                          </label>
-                          <select
-                            id={`feed-edit-type-${post.id}`}
-                            value={editingPostType}
-                            onChange={(event) =>
-                              setEditingPostType(
-                                event.target.value as FeedPostType,
-                              )
-                            }
-                          >
-                            <option value="GENERAL">Atualizacao</option>
-                            <option value="ADOPTION_SUCCESS">
-                              Adocao realizada
-                            </option>
-                            <option value="ANIMAL_UPDATE">
-                              Noticia de animal
-                            </option>
-                          </select>
-                        </div>
-
-                        <div className="form-field">
-                          <label htmlFor={`feed-edit-animal-${post.id}`}>
-                            Animal
-                          </label>
-                          <select
-                            id={`feed-edit-animal-${post.id}`}
-                            value={editingAnimalId}
-                            onChange={(event) =>
-                              setEditingAnimalId(event.target.value)
-                            }
-                          >
-                            <option value="">Sem alteracao</option>
-                            {animals.map((animal) => (
-                              <option key={animal.id} value={animal.id}>
-                                {animal.animalName} - {animal.species}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="actions">
-                        <button
-                          className="button"
-                          type="button"
-                          disabled={updatingPostId === post.id}
-                          onClick={() => handleUpdatePost(post.id)}
-                        >
-                          {updatingPostId === post.id
-                            ? 'Salvando...'
-                            : 'Salvar'}
-                        </button>
-                        <button
-                          className="button button--secondary"
-                          type="button"
-                          onClick={cancelEditingPost}
-                        >
-                          Cancelar
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <p>{post.content}</p>
-
-                      {post.imageUrl && (
-                        <img
-                          className="feed-post__image"
-                          src={post.imageUrl}
-                          alt=""
-                        />
-                      )}
-
-                      {post.animalId && (
-                        <Link
-                          className="feed-post__animal-link"
-                          to={`/animals/${post.animalId}`}
-                        >
-                          Ver animal: {post.animalName ?? 'detalhes'}
-                        </Link>
-                      )}
-
-                      {canManage && (
-                        <div className="feed-post__actions">
-                          <button
-                            className="button button--secondary"
-                            type="button"
-                            onClick={() => startEditingPost(post)}
-                          >
-                            Editar
-                          </button>
-                          <button
-                            className="button button--danger"
-                            type="button"
-                            disabled={deletingPostId === post.id}
-                            onClick={() => handleDeletePost(post.id)}
-                          >
-                            {deletingPostId === post.id
-                              ? 'Removendo...'
-                              : 'Remover'}
-                          </button>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </article>
-            )
-          })}
+            <ImageCropper
+              imageSrc={photoToCropPreview}
+              aspect={4 / 3}
+              confirmLabel="Usar foto"
+              onCancel={cancelPhotoCrop}
+              onConfirm={confirmPhotoCrop}
+            />
+          </div>
         </div>
       )}
     </section>

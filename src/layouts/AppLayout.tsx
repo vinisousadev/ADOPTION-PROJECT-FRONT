@@ -45,6 +45,30 @@ function ChevronDownIcon() {
   )
 }
 
+function SunIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2" />
+      <path d="M12 20v2" />
+      <path d="m4.93 4.93 1.41 1.41" />
+      <path d="m17.66 17.66 1.41 1.41" />
+      <path d="M2 12h2" />
+      <path d="M20 12h2" />
+      <path d="m6.34 17.66-1.41 1.41" />
+      <path d="m19.07 4.93-1.41 1.41" />
+    </svg>
+  )
+}
+
+function MoonIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5 7 7 0 1 0 20.5 15.5Z" />
+    </svg>
+  )
+}
+
 function getInitials(name: string) {
   return name
     .split(' ')
@@ -60,6 +84,16 @@ export function AppLayout() {
   const { user, logout } = useAuth()
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [profile, setProfile] = useState<UserResponse | null>(null)
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    const storedTheme = localStorage.getItem('adot:theme')
+
+    return storedTheme === 'dark' ? 'dark' : 'light'
+  })
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    localStorage.setItem('adot:theme', theme)
+  }, [theme])
 
   useEffect(() => {
     if (!user) {
@@ -87,7 +121,12 @@ export function AppLayout() {
     navigate('/login')
   }
 
+  function toggleTheme() {
+    setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'))
+  }
+
   const profilePhotoUrl = profile?.profilePhotoUrl
+  const isDarkTheme = theme === 'dark'
 
   return (
     <div className="app-shell">
@@ -129,6 +168,28 @@ export function AppLayout() {
           </nav>
 
           <div className="app-header__actions">
+            <button
+              className="theme-toggle"
+              type="button"
+              onClick={toggleTheme}
+              aria-label={
+                isDarkTheme ? 'Ativar tema claro' : 'Ativar tema escuro'
+              }
+              aria-pressed={isDarkTheme}
+            >
+              <span className="theme-toggle__track">
+                <span className="theme-toggle__icon theme-toggle__icon--sun">
+                  <SunIcon />
+                </span>
+                <span className="theme-toggle__icon theme-toggle__icon--moon">
+                  <MoonIcon />
+                </span>
+                <span className="theme-toggle__thumb">
+                  {isDarkTheme ? <MoonIcon /> : <SunIcon />}
+                </span>
+              </span>
+            </button>
+
             {user ? (
               <div className="user-menu">
                 <button
