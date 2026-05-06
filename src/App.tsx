@@ -1,4 +1,5 @@
 import { BrowserRouter } from 'react-router-dom'
+import { SmoothScrollProvider } from './components/SmoothScrollProvider'
 import { AuthProvider } from './contexts/AuthContext'
 import { AppRoutes } from './routes/AppRoutes'
 import './App.css'
@@ -6,9 +7,11 @@ import './App.css'
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
+      <SmoothScrollProvider>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </SmoothScrollProvider>
     </BrowserRouter>
   )
 }
