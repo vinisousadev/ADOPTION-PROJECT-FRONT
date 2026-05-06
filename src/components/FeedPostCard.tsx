@@ -85,6 +85,7 @@ export function FeedPostCard({
   const [commentCount, setCommentCount] = useState(post.commentCount)
   const [comments, setComments] = useState<FeedPostCommentResponse[]>([])
   const [commentText, setCommentText] = useState('')
+  const [isInlineCommentsOpen, setIsInlineCommentsOpen] = useState(false)
   const [isPostModalOpen, setIsPostModalOpen] = useState(false)
   const [isEmojiMenuOpen, setIsEmojiMenuOpen] = useState(false)
   const [isLoadingComments, setIsLoadingComments] = useState(false)
@@ -202,6 +203,23 @@ export function FeedPostCard({
     setIsEmojiMenuOpen(false)
   }
 
+  function openComments() {
+    setInteractionError('')
+
+    if (post.imageUrl) {
+      openPostModal()
+      return
+    }
+
+    setIsInlineCommentsOpen(true)
+
+    if (comments.length === 0) {
+      void loadComments()
+    }
+
+    window.setTimeout(() => commentTextareaRef.current?.focus(), 0)
+  }
+
   async function handleSubmitComment(event?: FormEvent<HTMLFormElement>) {
     event?.preventDefault()
 
@@ -241,6 +259,124 @@ export function FeedPostCard({
 
   const authorRoleLabel = post.authorRoleLabel === 'ONG' ? 'ONG' : 'Protetor'
   const hasCommentText = commentText.trim().length > 0
+
+  function renderCommentComposer() {
+    return (
+      <div className="feed-post__comment-composer">
+        <div className="feed-post__comment-avatar">
+          {currentUserProfilePhotoUrl ? (
+            <img src={currentUserProfilePhotoUrl} alt="" />
+          ) : (
+            <span>{getInitials(currentUserName)}</span>
+          )}
+        </div>
+
+        <form className="feed-post__comment-field" onSubmit={handleSubmitComment}>
+          <div className="feed-post__comment-input-wrap">
+            <textarea
+              ref={commentTextareaRef}
+              value={commentText}
+              onChange={(event) => setCommentText(event.target.value)}
+              placeholder="Adicionar comentario..."
+              rows={1}
+              maxLength={500}
+            />
+
+            <div ref={emojiMenuRef} className="feed-post__emoji-wrapper">
+              <button
+                className="feed-post__emoji-button"
+                type="button"
+                onClick={() =>
+                  setIsEmojiMenuOpen((currentValue) => !currentValue)
+                }
+                aria-expanded={isEmojiMenuOpen}
+                aria-label="Abrir emojis"
+              >
+                {'\u{1F642}'}
+              </button>
+
+              <AnimatePresence>
+                {isEmojiMenuOpen && (
+                  <motion.div
+                    className="feed-post__emoji-menu"
+                    initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                    transition={{ duration: 0.16 }}
+                  >
+                    {emojiOptions.map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => appendEmoji(emoji)}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {hasCommentText && (
+              <button
+                className="feed-post__comment-submit"
+                type="submit"
+                disabled={isSubmittingComment}
+              >
+                {isSubmittingComment ? '...' : 'Enviar'}
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+    )
+  }
+
+  function renderCommentsList({ compact = false } = {}) {
+    if (isLoadingComments) {
+      return <p>Carregando comentarios...</p>
+    }
+
+    if (comments.length === 0) {
+      return <p className="feed-post-modal__empty-comments">Nenhum comentario ainda.</p>
+    }
+
+    const content = (
+      <>
+        <div className="feed-post__comment-list">
+          {comments.map((comment) => (
+            <article className="feed-post__comment" key={comment.id}>
+              <div className="feed-post__comment-avatar">
+                {comment.authorProfilePhotoUrl ? (
+                  <img src={comment.authorProfilePhotoUrl} alt="" />
+                ) : (
+                  <span>{getInitials(comment.authorName)}</span>
+                )}
+              </div>
+              <div>
+                <strong>{comment.authorName}</strong>
+                <p>{comment.content}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        {hasMoreComments && (
+          <button
+            className="feed-post-modal__more-comments"
+            type="button"
+            disabled={isLoadingComments}
+            onClick={() => loadComments(commentsPage + 1)}
+          >
+            {isLoadingComments ? 'Carregando...' : 'Ver mais comentarios'}
+          </button>
+        )}
+      </>
+    )
+
+    return compact ? content : <div className="feed-post-modal__comment-scroll">{content}</div>
+  }
 
   return (
     <>
@@ -417,12 +553,7 @@ export function FeedPostCard({
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    if (post.imageUrl) {
-                      openPostModal()
-                    }
-                  }}
-                  disabled={!post.imageUrl}
+                  onClick={openComments}
                 >
                   <CommentIcon />
                   Comentar
@@ -433,6 +564,13 @@ export function FeedPostCard({
                 <p className="feed-post__interaction-error">
                   {interactionError}
                 </p>
+              )}
+
+              {isInlineCommentsOpen && !post.imageUrl && (
+                <div className="feed-post__comments feed-post__comments--inline">
+                  {renderCommentComposer()}
+                  {renderCommentsList({ compact: true })}
+                </div>
               )}
             </>
           )}
@@ -532,126 +670,8 @@ export function FeedPostCard({
               )}
 
               <div className="feed-post__comments feed-post-modal__comments">
-                <div className="feed-post__comment-composer">
-                  <div className="feed-post__comment-avatar">
-                    {currentUserProfilePhotoUrl ? (
-                      <img src={currentUserProfilePhotoUrl} alt="" />
-                    ) : (
-                      <span>{getInitials(currentUserName)}</span>
-                    )}
-                  </div>
-
-                  <form
-                    className="feed-post__comment-field"
-                    onSubmit={handleSubmitComment}
-                  >
-                    <div className="feed-post__comment-input-wrap">
-                      <textarea
-                        ref={commentTextareaRef}
-                        value={commentText}
-                        onChange={(event) => setCommentText(event.target.value)}
-                        placeholder="Adicionar comentario..."
-                        rows={1}
-                        maxLength={500}
-                      />
-
-                      <div
-                        ref={emojiMenuRef}
-                        className="feed-post__emoji-wrapper"
-                      >
-                        <button
-                          className="feed-post__emoji-button"
-                          type="button"
-                          onClick={() =>
-                            setIsEmojiMenuOpen((currentValue) => !currentValue)
-                          }
-                          aria-expanded={isEmojiMenuOpen}
-                          aria-label="Abrir emojis"
-                        >
-                          {'\u{1F642}'}
-                        </button>
-
-                        <AnimatePresence>
-                          {isEmojiMenuOpen && (
-                          <motion.div
-                            className="feed-post__emoji-menu"
-                            initial={{ opacity: 0, y: 8, scale: 0.98 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 8, scale: 0.98 }}
-                            transition={{ duration: 0.16 }}
-                          >
-                            {emojiOptions.map((emoji) => (
-                              <button
-                                key={emoji}
-                                type="button"
-                                onClick={() => appendEmoji(emoji)}
-                              >
-                                {emoji}
-                              </button>
-                            ))}
-                          </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-
-                      {hasCommentText && (
-                        <button
-                          className="feed-post__comment-submit"
-                          type="submit"
-                          disabled={isSubmittingComment}
-                        >
-                          {isSubmittingComment ? '...' : 'Enviar'}
-                        </button>
-                      )}
-                    </div>
-                  </form>
-                </div>
-
-                {isLoadingComments && <p>Carregando comentarios...</p>}
-
-                {comments.length > 0 ? (
-                  <div className="feed-post-modal__comment-scroll">
-                    <div className="feed-post__comment-list">
-                      {comments.map((comment) => (
-                        <article
-                          className="feed-post__comment"
-                          key={comment.id}
-                        >
-                          <div className="feed-post__comment-avatar">
-                            {comment.authorProfilePhotoUrl ? (
-                              <img src={comment.authorProfilePhotoUrl} alt="" />
-                            ) : (
-                              <span>{getInitials(comment.authorName)}</span>
-                            )}
-                          </div>
-                          <div>
-                            <strong>{comment.authorName}</strong>
-                            <p>{comment.content}</p>
-                          </div>
-                        </article>
-                      ))}
-                    </div>
-
-                    {hasMoreComments && (
-                      <button
-                        className="feed-post-modal__more-comments"
-                        type="button"
-                        disabled={isLoadingComments}
-                        onClick={() => loadComments(commentsPage + 1)}
-                      >
-                        {isLoadingComments
-                          ? 'Carregando...'
-                          : 'Ver mais comentarios'}
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  !isLoadingComments && (
-                    <p className="feed-post-modal__empty-comments">
-                      Nenhum comentario ainda.
-                    </p>
-                  )
-                )}
+                {renderCommentComposer()}
+                {renderCommentsList()}
               </div>
             </div>
           </motion.article>
