@@ -2,7 +2,7 @@ export type UserType = 'COMMON' | 'ADMIN'
 
 export type CreateUserRequest = {
   name: string
-  cpf: string
+  cpf?: string
   phone?: string
   email: string
   city?: string
@@ -13,7 +13,7 @@ export type CreateUserRequest = {
 export type UserResponse = {
   id: number
   name: string
-  cpf: string
+  cpf?: string
   phone?: string
   email: string
   city?: string

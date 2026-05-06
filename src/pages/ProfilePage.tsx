@@ -223,10 +223,6 @@ export function ProfilePage() {
           <dd>{formatUserType(profileUserType)}</dd>
         </div>
         <div>
-          <dt>CPF</dt>
-          <dd>{formatOptionalValue(profile?.cpf)}</dd>
-        </div>
-        <div>
           <dt>Telefone</dt>
           <dd>{formatOptionalValue(profile?.phone)}</dd>
         </div>

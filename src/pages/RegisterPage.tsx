@@ -12,7 +12,6 @@ import { onlyDigits } from '../utils/onlyDigits'
 
 type RegisterFormState = {
   name: string
-  cpf: string
   phone: string
   email: string
   city: string
@@ -22,7 +21,6 @@ type RegisterFormState = {
 
 const initialFormState: RegisterFormState = {
   name: '',
-  cpf: '',
   phone: '',
   email: '',
   city: '',
@@ -92,10 +90,6 @@ export function RegisterPage() {
       return 'Informe seu nome completo.'
     }
 
-    if (onlyDigits(form.cpf).length !== 11) {
-      return 'Informe um CPF com 11 digitos.'
-    }
-
     if (form.phone && onlyDigits(form.phone).length < 10) {
       return 'Informe um telefone com DDD.'
     }
@@ -134,12 +128,10 @@ export function RegisterPage() {
     setIsSubmitting(true)
 
     try {
-      const cleanedCpf = onlyDigits(form.cpf)
       const cleanedPhone = onlyDigits(form.phone)
 
       await createUser({
         name: form.name.trim(),
-        cpf: cleanedCpf,
         phone: cleanedPhone || undefined,
         email: form.email.trim(),
         city: form.city || undefined,
@@ -180,23 +172,6 @@ export function RegisterPage() {
               required
               maxLength={100}
               autoComplete="name"
-            />
-          </div>
-
-          <div className="form-field">
-            <label htmlFor="cpf">CPF</label>
-            <input
-              id="cpf"
-              type="text"
-              value={form.cpf}
-              onChange={(event) =>
-                updateField('cpf', onlyDigits(event.target.value))
-              }
-              placeholder="12345678900"
-              required
-              inputMode="numeric"
-              minLength={11}
-              maxLength={11}
             />
           </div>
 
