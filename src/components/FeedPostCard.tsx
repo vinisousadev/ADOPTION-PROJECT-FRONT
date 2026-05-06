@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import type { FormEvent } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
@@ -201,7 +202,13 @@ export function FeedPostCard({
     setIsEmojiMenuOpen(false)
   }
 
-  async function handleSubmitComment() {
+  async function handleSubmitComment(event?: FormEvent<HTMLFormElement>) {
+    event?.preventDefault()
+
+    if (isSubmittingComment) {
+      return
+    }
+
     const normalizedComment = commentText.trim()
 
     if (normalizedComment.length < 2) {
@@ -534,7 +541,10 @@ export function FeedPostCard({
                     )}
                   </div>
 
-                  <div className="feed-post__comment-field">
+                  <form
+                    className="feed-post__comment-field"
+                    onSubmit={handleSubmitComment}
+                  >
                     <div className="feed-post__comment-input-wrap">
                       <textarea
                         ref={commentTextareaRef}
@@ -587,15 +597,14 @@ export function FeedPostCard({
                       {hasCommentText && (
                         <button
                           className="feed-post__comment-submit"
-                          type="button"
+                          type="submit"
                           disabled={isSubmittingComment}
-                          onClick={handleSubmitComment}
                         >
                           {isSubmittingComment ? '...' : 'Enviar'}
                         </button>
                       )}
                     </div>
-                  </div>
+                  </form>
                 </div>
 
                 {isLoadingComments && <p>Carregando comentarios...</p>}

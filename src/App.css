@@ -2739,6 +2739,8 @@
 }
 
 .feed-post__comment-field textarea {
+  position: relative;
+  z-index: 1;
   width: 100%;
   min-height: 42px;
   max-height: 140px;
@@ -2762,7 +2764,7 @@
   position: absolute;
   right: 8px;
   bottom: 6px;
-  z-index: 30;
+  z-index: 90;
 }
 
 .feed-post__emoji-button,
@@ -2789,10 +2791,12 @@
   position: absolute;
   right: 48px;
   bottom: 6px;
+  z-index: 80;
   min-height: 30px;
   padding: 0 16px;
   background: var(--color-primary);
   color: #ffffff;
+  pointer-events: auto;
 }
 
 .feed-post__comment-submit:disabled {
