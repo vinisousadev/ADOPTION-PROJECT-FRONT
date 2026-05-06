@@ -140,7 +140,9 @@ export function RegisterPage() {
       })
 
       setForm(initialFormState)
-      setSuccessMessage('Cadastro criado com sucesso. Voce ja pode fazer login.')
+      setSuccessMessage(
+        'Cadastro criado com sucesso. Enviamos um email para voce confirmar sua conta antes do login.',
+      )
     } catch (error) {
       setErrorMessage(getApiErrorMessage(error))
     } finally {

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { resendEmailConfirmation } from '../services/authService'
 import { getApiErrorMessage } from '../utils/getApiErrorMessage'
 
 export function LoginPage() {
@@ -11,11 +12,14 @@ export function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isResendingEmail, setIsResendingEmail] = useState(false)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setErrorMessage('')
+    setSuccessMessage('')
     setIsSubmitting(true)
 
     try {
@@ -27,6 +31,30 @@ export function LoginPage() {
       setIsSubmitting(false)
     }
   }
+
+  async function handleResendConfirmation() {
+    if (!email) {
+      setErrorMessage('Informe seu email para reenviar a confirmacao.')
+      return
+    }
+
+    setErrorMessage('')
+    setSuccessMessage('')
+    setIsResendingEmail(true)
+
+    try {
+      const response = await resendEmailConfirmation(email)
+      setSuccessMessage(response.message || 'Email de confirmacao reenviado.')
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error))
+    } finally {
+      setIsResendingEmail(false)
+    }
+  }
+
+  const shouldShowResendConfirmation =
+    errorMessage.toLowerCase().includes('email') &&
+    errorMessage.toLowerCase().includes('confirm')
 
   return (
     <section className="auth-page">
@@ -67,11 +95,22 @@ export function LoginPage() {
         </div>
 
         {errorMessage && <p className="form-error">{errorMessage}</p>}
+        {successMessage && <p className="form-success">{successMessage}</p>}
 
         <div className="actions">
           <button className="button" type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Entrando...' : 'Entrar'}
           </button>
+          {shouldShowResendConfirmation && (
+            <button
+              className="button button--secondary"
+              type="button"
+              disabled={isResendingEmail}
+              onClick={handleResendConfirmation}
+            >
+              {isResendingEmail ? 'Reenviando...' : 'Reenviar email'}
+            </button>
+          )}
           <Link className="button button--secondary" to="/register">
             Registre-se
           </Link>

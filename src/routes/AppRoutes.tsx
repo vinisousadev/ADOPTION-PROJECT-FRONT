@@ -3,6 +3,7 @@ import { AppLayout } from '../layouts/AppLayout'
 import { AnimalDetailsPage } from '../pages/AnimalDetailsPage'
 import { AnimalAreaPage } from '../pages/AnimalAreaPage'
 import { AnimalsPage } from '../pages/AnimalsPage'
+import { ConfirmEmailPage } from '../pages/ConfirmEmailPage'
 import { CreateAnimalPage } from '../pages/CreateAnimalPage'
 import { EditAnimalPage } from '../pages/EditAnimalPage'
 import { FeedPage } from '../pages/FeedPage'
@@ -25,6 +26,7 @@ export function AppRoutes() {
         <Route path="animals/:id" element={<AnimalDetailsPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
+        <Route path="confirm-email" element={<ConfirmEmailPage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="feed" element={<FeedPage />} />
           <Route path="animal-area" element={<AnimalAreaPage />} />

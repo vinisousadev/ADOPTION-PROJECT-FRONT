@@ -14,6 +14,11 @@ export type LoginResponse = {
   token: string
 }
 
+export type EmailConfirmationResponse = {
+  message: string
+  emailVerified: boolean
+}
+
 export type AuthenticatedUser = {
   userId: number
   name: string

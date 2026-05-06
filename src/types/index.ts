@@ -1,4 +1,9 @@
-export type { AuthenticatedUser, LoginRequest, LoginResponse } from './auth'
+export type {
+  AuthenticatedUser,
+  EmailConfirmationResponse,
+  LoginRequest,
+  LoginResponse,
+} from './auth'
 export type { CreateUserRequest, UserResponse, UserType } from './user'
 export type {
   AgeUnit,
