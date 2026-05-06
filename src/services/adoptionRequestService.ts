@@ -27,6 +27,17 @@ export async function getReceivedAdoptionRequests(): Promise<
   return response.data
 }
 
+export async function getMyAdoptionHistory(): Promise<
+  PagedResponse<AdoptionRequestResponse>
+> {
+  const response =
+    await api.get<PagedResponse<AdoptionRequestResponse>>(
+      '/adoption-requests/adoption-history',
+    )
+
+  return response.data
+}
+
 export async function createAdoptionRequest(
   request: CreateAdoptionRequest,
 ): Promise<AdoptionRequestResponse> {

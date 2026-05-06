@@ -1,9 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AnimalPhotoCarousel } from '../components/AnimalPhotoCarousel'
+import { getMyAdoptionHistory } from '../services/adoptionRequestService'
 import { getAnimalPhotos } from '../services/animalPhotoService'
 import { deleteAnimal, getMyAnimals } from '../services/animalService'
-import type { AnimalPhotoResponse, AnimalResponse } from '../types'
+import type {
+  AdoptionRequestResponse,
+  AnimalPhotoResponse,
+  AnimalResponse,
+  AnimalStatus,
+} from '../types'
 import {
   formatAnimalAge,
   formatAnimalLocation,
@@ -13,11 +19,18 @@ import {
 } from '../utils/animalFormatters'
 import { getApiErrorMessage } from '../utils/getApiErrorMessage'
 
+type MyAnimalsFilter = 'AVAILABLE' | 'ADOPTED'
+
 export function MyAnimalsPage() {
   const [animals, setAnimals] = useState<AnimalResponse[]>([])
+  const [adoptionHistoryByAnimalId, setAdoptionHistoryByAnimalId] = useState<
+    Record<number, AdoptionRequestResponse>
+  >({})
   const [photosByAnimalId, setPhotosByAnimalId] = useState<
     Record<number, AnimalPhotoResponse[]>
   >({})
+  const [filterStatus, setFilterStatus] =
+    useState<MyAnimalsFilter>('AVAILABLE')
   const [successMessage, setSuccessMessage] = useState('')
   const [deletingAnimalId, setDeletingAnimalId] = useState<number | null>(null)
   const [message, setMessage] = useState('')
@@ -26,11 +39,24 @@ export function MyAnimalsPage() {
   useEffect(() => {
     async function loadMyAnimals() {
       try {
-        const response = await getMyAnimals()
-        const visibleAnimals = response.content.filter(
+        const [animalsResponse, adoptionHistoryResponse] = await Promise.all([
+          getMyAnimals(),
+          getMyAdoptionHistory(),
+        ])
+        const visibleAnimals = animalsResponse.content.filter(
           (animal) => animal.status !== 'REMOVED',
         )
+        const nextAdoptionHistoryByAnimalId: Record<
+          number,
+          AdoptionRequestResponse
+        > = {}
+
+        adoptionHistoryResponse.content.forEach((historyItem) => {
+          nextAdoptionHistoryByAnimalId[historyItem.animalId] = historyItem
+        })
+
         setAnimals(visibleAnimals)
+        setAdoptionHistoryByAnimalId(nextAdoptionHistoryByAnimalId)
 
         const photoEntries = await Promise.all(
           visibleAnimals.map(async (animal) => {
@@ -92,6 +118,14 @@ export function MyAnimalsPage() {
     }
   }
 
+  const filteredAnimals = animals.filter(
+    (animal) => animal.status === (filterStatus as AnimalStatus),
+  )
+  const emptyStateMessage =
+    filterStatus === 'AVAILABLE'
+      ? 'Voce nao tem animais disponiveis no momento.'
+      : 'Voce ainda nao tem animais adotados.'
+
   return (
     <section className="page">
       <h1>Meus animais</h1>
@@ -101,66 +135,115 @@ export function MyAnimalsPage() {
       {message && <p className="form-error">{message}</p>}
       {successMessage && <p className="form-success">{successMessage}</p>}
 
+      {!isLoading && !message && animals.length > 0 && (
+        <div className="page-toolbar">
+          <label htmlFor="my-animals-filter">Mostrar</label>
+          <select
+            id="my-animals-filter"
+            value={filterStatus}
+            onChange={(event) =>
+              setFilterStatus(event.target.value as MyAnimalsFilter)
+            }
+          >
+            <option value="AVAILABLE">Animais disponiveis</option>
+            <option value="ADOPTED">Animais adotados</option>
+          </select>
+        </div>
+      )}
+
       {!isLoading && !message && !successMessage && animals.length === 0 && (
         <p className="empty-state">Voce ainda nao cadastrou animais.</p>
       )}
 
-      {animals.length > 0 && (
+      {!isLoading &&
+        !message &&
+        animals.length > 0 &&
+        filteredAnimals.length === 0 && (
+          <p className="empty-state">{emptyStateMessage}</p>
+        )}
+
+      {filteredAnimals.length > 0 && (
         <div className="animal-grid">
-          {animals.map((animal) => (
-            <article className="animal-card" key={animal.id}>
-              <AnimalPhotoCarousel
-                animalName={animal.animalName}
-                photos={photosByAnimalId[animal.id] ?? []}
-              />
+          {filteredAnimals.map((animal) => {
+            const adoptionHistory = adoptionHistoryByAnimalId[animal.id]
 
-              <div className="animal-card__header">
-                <h2>{animal.animalName}</h2>
-                <span>{formatAnimalStatus(animal.status)}</span>
+            return (
+              <article className="animal-card" key={animal.id}>
+                <AnimalPhotoCarousel
+                  animalName={animal.animalName}
+                  photos={photosByAnimalId[animal.id] ?? []}
+                />
 
-                <p>
-                  {animal.species}
-                  {animal.breed ? ` - ${animal.breed}` : ''}
-                </p>
-              </div>
+                <div className="animal-card__header">
+                  <h2>{animal.animalName}</h2>
+                  <span>{formatAnimalStatus(animal.status)}</span>
 
-              <dl>
-                <div>
-                  <dt>Idade</dt>
-                  <dd>{formatAnimalAge(animal.ageValue, animal.ageUnit)}</dd>
+                  <p>
+                    {animal.species}
+                    {animal.breed ? ` - ${animal.breed}` : ''}
+                  </p>
                 </div>
-                <div>
-                  <dt>Porte</dt>
-                  <dd>{formatAnimalSize(animal.animalSize)}</dd>
-                </div>
-                <div>
-                  <dt>Sexo</dt>
-                  <dd>{formatAnimalSex(animal.sex)}</dd>
-                </div>
-                <div>
-                  <dt>Localizacao</dt>
-                  <dd>{formatAnimalLocation(animal)}</dd>
-                </div>
-              </dl>
 
-              <div className="actions">
-                <Link
-                  className="button button--secondary"
-                  to={`/animals/${animal.id}/edit`}
-                >
-                  Editar
-                </Link>
-                <button
-                  className="button button--danger"
-                  type="button"
-                  disabled={deletingAnimalId === animal.id}
-                  onClick={() => handleDeleteAnimal(animal)}
-                >
-                  {deletingAnimalId === animal.id ? 'Removendo...' : 'Remover'}
-                </button>
-              </div>
-            </article>
-          ))}
+                <dl>
+                  <div>
+                    <dt>Idade</dt>
+                    <dd>{formatAnimalAge(animal.ageValue, animal.ageUnit)}</dd>
+                  </div>
+                  <div>
+                    <dt>Porte</dt>
+                    <dd>{formatAnimalSize(animal.animalSize)}</dd>
+                  </div>
+                  <div>
+                    <dt>Sexo</dt>
+                    <dd>{formatAnimalSex(animal.sex)}</dd>
+                  </div>
+                  <div>
+                    <dt>Localizacao</dt>
+                    <dd>{formatAnimalLocation(animal)}</dd>
+                  </div>
+                  {filterStatus === 'ADOPTED' && adoptionHistory && (
+                    <>
+                      <div>
+                        <dt>Adotante</dt>
+                        <dd>{adoptionHistory.requesterName || 'Nao informado'}</dd>
+                      </div>
+                      <div>
+                        <dt>Adotado em</dt>
+                        <dd>
+                          {adoptionHistory.responseDate
+                            ? new Date(
+                                adoptionHistory.responseDate,
+                              ).toLocaleDateString('pt-BR')
+                            : 'Nao informado'}
+                        </dd>
+                      </div>
+                    </>
+                  )}
+                </dl>
+
+                <div className="actions">
+                  <Link
+                    className="button button--secondary"
+                    to={`/animals/${animal.id}/edit`}
+                  >
+                    Editar
+                  </Link>
+                  {filterStatus === 'AVAILABLE' && (
+                    <button
+                      className="button button--danger"
+                      type="button"
+                      disabled={deletingAnimalId === animal.id}
+                      onClick={() => handleDeleteAnimal(animal)}
+                    >
+                      {deletingAnimalId === animal.id
+                        ? 'Removendo...'
+                        : 'Remover'}
+                    </button>
+                  )}
+                </div>
+              </article>
+            )
+          })}
         </div>
       )}
     </section>

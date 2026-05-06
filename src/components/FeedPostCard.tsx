@@ -215,7 +215,7 @@ export function FeedPostCard({
         content: normalizedComment,
       })
 
-      setComments((currentComments) => [...currentComments, createdComment])
+      setComments((currentComments) => [createdComment, ...currentComments])
       setCommentCount((currentCount) => currentCount + 1)
       setCommentText('')
       setIsEmojiMenuOpen(false)
@@ -473,7 +473,7 @@ export function FeedPostCard({
                   to={`/animals/${post.animalId}`}
                   onClick={closePostModal}
                 >
-                  Ver animal{post.animalName ? `: ${post.animalName}` : ''}
+                  Conheça{post.animalName ? `: ${post.animalName}` : ''}
                 </Link>
               )}
 

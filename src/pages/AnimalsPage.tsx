@@ -9,24 +9,8 @@ import {
   formatAnimalLocation,
   formatAnimalOwnerName,
   formatAnimalSex,
-  formatAnimalSize,
-  formatAnimalStatus,
-  formatAnimalWeight,
-  formatYesNo,
 } from '../utils/animalFormatters'
 import { getApiErrorMessage } from '../utils/getApiErrorMessage'
-
-function getShortDescription(description: string | undefined) {
-  if (!description) {
-    return 'Sem descricao informada.'
-  }
-
-  if (description.length <= 120) {
-    return description
-  }
-
-  return `${description.slice(0, 117)}...`
-}
 
 export function AnimalsPage() {
   const [animals, setAnimals] = useState<AnimalResponse[]>([])
@@ -97,17 +81,11 @@ export function AnimalsPage() {
 
               <div className="animal-card__header">
                 <h2>{animal.animalName}</h2>
-                <span>{formatAnimalStatus(animal.status)}</span>
-
                 <p>
                   {animal.species}
                   {animal.breed ? ` - ${animal.breed}` : ''}
                 </p>
               </div>
-
-              <p className="animal-card__description">
-                {getShortDescription(animal.description)}
-              </p>
 
               <dl>
                 <div>
@@ -115,24 +93,8 @@ export function AnimalsPage() {
                   <dd>{formatAnimalAge(animal.ageValue, animal.ageUnit)}</dd>
                 </div>
                 <div>
-                  <dt>Porte</dt>
-                  <dd>{formatAnimalSize(animal.animalSize)}</dd>
-                </div>
-                <div>
                   <dt>Sexo</dt>
                   <dd>{formatAnimalSex(animal.sex)}</dd>
-                </div>
-                <div>
-                  <dt>Peso</dt>
-                  <dd>{formatAnimalWeight(animal.weightKg)}</dd>
-                </div>
-                <div>
-                  <dt>Vacinado</dt>
-                  <dd>{formatYesNo(animal.vaccinated)}</dd>
-                </div>
-                <div>
-                  <dt>Castrado</dt>
-                  <dd>{formatYesNo(animal.neutered)}</dd>
                 </div>
                 <div>
                   <dt>Localizacao</dt>

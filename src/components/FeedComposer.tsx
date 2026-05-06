@@ -23,6 +23,17 @@ function PhotoIcon() {
   )
 }
 
+function SmileIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="8" />
+      <path d="M9 10h.01" />
+      <path d="M15 10h.01" />
+      <path d="M8.5 14c1 1.4 2.1 2 3.5 2s2.5-.6 3.5-2" />
+    </svg>
+  )
+}
+
 type FeedComposerProps = {
   authorName: string
   profilePhotoUrl?: string
@@ -67,7 +78,18 @@ export function FeedComposer({
   const photoInputRef = useRef<HTMLInputElement | null>(null)
   const videoInputRef = useRef<HTMLInputElement | null>(null)
   const [isAnimalPickerOpen, setIsAnimalPickerOpen] = useState(false)
+  const [isEmojiMenuOpen, setIsEmojiMenuOpen] = useState(false)
   const selectedAnimal = animals.find((animal) => animal.id === selectedAnimalId)
+  const emojiOptions = [
+    '\u{1F43E}',
+    '\u{1F431}',
+    '\u{1F436}',
+    '\u{1F49A}',
+    '\u{1F60D}',
+    '\u{1F64C}',
+    '\u{2728}',
+    '\u{1F3E1}',
+  ]
 
   return (
     <>
@@ -167,7 +189,10 @@ export function FeedComposer({
                   type="button"
                   disabled={animals.length === 0}
                   onClick={() =>
-                    setIsAnimalPickerOpen((currentValue) => !currentValue)
+                    setIsAnimalPickerOpen((currentValue) => {
+                      setIsEmojiMenuOpen(false)
+                      return !currentValue
+                    })
                   }
                 >
                   Escolher animal
@@ -199,6 +224,38 @@ export function FeedComposer({
                       >
                         <strong>{animal.animalName}</strong>
                         <span>{animal.species}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="feed-composer-emoji">
+                <button
+                  className="feed-media-button"
+                  type="button"
+                  onClick={() =>
+                    setIsEmojiMenuOpen((currentValue) => {
+                      setIsAnimalPickerOpen(false)
+                      return !currentValue
+                    })
+                  }
+                >
+                  <SmileIcon />
+                  Emoji
+                </button>
+
+                {isEmojiMenuOpen && (
+                  <div className="feed-composer-emoji__menu">
+                    {emojiOptions.map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => {
+                          onContentChange(`${content}${emoji}`)
+                          setIsEmojiMenuOpen(false)
+                        }}
+                      >
+                        {emoji}
                       </button>
                     ))}
                   </div>
