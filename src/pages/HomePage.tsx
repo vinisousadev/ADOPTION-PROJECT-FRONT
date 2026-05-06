@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import {
+  pageMotion,
+  revealMotion,
+  staggerContainerMotion,
+  staggerItemMotion,
+} from '../utils/motionVariants'
 
 const adoptionStories = [
   {
@@ -57,44 +64,6 @@ export function HomePage() {
   }, [])
 
   useEffect(() => {
-    const revealElements = Array.from(
-      document.querySelectorAll<HTMLElement>('.reveal-on-scroll'),
-    )
-    let animationFrameId = 0
-
-    function revealVisibleElements() {
-      const revealLimit = window.innerHeight * 0.82
-
-      revealElements.forEach((element) => {
-        if (element.classList.contains('is-visible')) {
-          return
-        }
-
-        const elementTop = element.getBoundingClientRect().top
-
-        if (elementTop < revealLimit) {
-          element.classList.add('is-visible')
-        }
-      })
-    }
-
-    function scheduleRevealCheck() {
-      window.cancelAnimationFrame(animationFrameId)
-      animationFrameId = window.requestAnimationFrame(revealVisibleElements)
-    }
-
-    revealVisibleElements()
-    window.addEventListener('scroll', scheduleRevealCheck, { passive: true })
-    window.addEventListener('resize', scheduleRevealCheck)
-
-    return () => {
-      window.cancelAnimationFrame(animationFrameId)
-      window.removeEventListener('scroll', scheduleRevealCheck)
-      window.removeEventListener('resize', scheduleRevealCheck)
-    }
-  }, [])
-
-  useEffect(() => {
     function handleScroll() {
       setHeroOffset(Math.min(window.scrollY * 0.14, 70))
     }
@@ -106,12 +75,20 @@ export function HomePage() {
   }, [])
 
   return (
-    <section className="home-page">
-      <div
+    <motion.section className="home-page" {...pageMotion}>
+      <motion.div
         className="home-hero"
         style={{ backgroundPosition: `center calc(50% + ${heroOffset}px)` }}
+        initial={{ opacity: 0, scale: 0.985 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.7, ease: 'easeOut' }}
       >
-        <div className="home-hero__content">
+        <motion.div
+          className="home-hero__content"
+          initial={{ opacity: 0, y: 26 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12, duration: 0.62, ease: 'easeOut' }}
+        >
           <p className="eyebrow">Adocao responsavel</p>
           <h1>Encontre uma nova familia para cada animal</h1>
           <p>
@@ -133,30 +110,31 @@ export function HomePage() {
               </Link>
             )}
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      <div
-        className="home-stats reveal-on-scroll"
+      <motion.div
+        className="home-stats"
         aria-label="Resumo da plataforma"
+        {...staggerContainerMotion}
       >
-        <article>
+        <motion.article {...staggerItemMotion}>
           <strong>+ cuidado</strong>
           <span>Pedidos organizados entre adotantes e tutores.</span>
-        </article>
+        </motion.article>
 
-        <article>
+        <motion.article {...staggerItemMotion}>
           <strong>+ clareza</strong>
           <span>Fotos, localizacao e detalhes reunidos em um so lugar.</span>
-        </article>
+        </motion.article>
 
-        <article>
+        <motion.article {...staggerItemMotion}>
           <strong>+ controle</strong>
           <span>Acompanhe solicitacoes enviadas e recebidas.</span>
-        </article>
-      </div>
+        </motion.article>
+      </motion.div>
 
-      <section className="home-section home-section--intro reveal-on-scroll">
+      <motion.section className="home-section home-section--intro" {...revealMotion}>
         <div>
           <p className="eyebrow">Animais esperando</p>
           <h2>Uma listagem feita para decidir com carinho</h2>
@@ -166,10 +144,13 @@ export function HomePage() {
           dados do tutor. Assim a pessoa interessada consegue entender melhor o
           animal antes de enviar uma solicitacao.
         </p>
-      </section>
+      </motion.section>
 
-      <div className="home-feature-grid reveal-on-scroll">
-        <article className="home-feature home-feature--photo">
+      <motion.div className="home-feature-grid" {...staggerContainerMotion}>
+        <motion.article
+          className="home-feature home-feature--photo"
+          {...staggerItemMotion}
+        >
           <div>
             <span>Fotos reais</span>
             <h3>Galeria do animal</h3>
@@ -178,58 +159,59 @@ export function HomePage() {
               corte para apresentar o animal com mais cuidado.
             </p>
           </div>
-        </article>
+        </motion.article>
 
-        <article className="home-feature">
+        <motion.article className="home-feature" {...staggerItemMotion}>
           <span>Status claro</span>
           <h3>Disponibilidade visivel</h3>
           <p>
             Os cards mostram quando o animal esta disponivel e evitam pedidos
             confusos quando o processo ja avancou.
           </p>
-        </article>
+        </motion.article>
 
-        <article className="home-feature">
+        <motion.article className="home-feature" {...staggerItemMotion}>
           <span>Localizacao</span>
           <h3>Mais contexto antes do contato</h3>
           <p>
             Cidade, estado e responsavel aparecem no detalhe para ajudar a
             alinhar distancia, logistica e responsabilidade.
           </p>
-        </article>
-      </div>
+        </motion.article>
+      </motion.div>
 
-      <section className="home-section reveal-on-scroll">
+      <motion.section className="home-section" {...revealMotion}>
         <div>
           <p className="eyebrow">Como funciona</p>
           <h2>Do interesse ao pedido, tudo fica registrado</h2>
         </div>
-      </section>
+      </motion.section>
 
-      <div
-        className="home-highlights reveal-on-scroll"
+      <motion.div
+        className="home-highlights"
         aria-label="Etapas da adocao"
+        {...staggerContainerMotion}
       >
-        <article>
+        <motion.article {...staggerItemMotion}>
           <span>01</span>
           <h2>Conheca</h2>
           <p>Veja animais disponiveis com fotos, detalhes e localizacao.</p>
-        </article>
+        </motion.article>
 
-        <article>
+        <motion.article {...staggerItemMotion}>
           <span>02</span>
           <h2>Solicite</h2>
           <p>Envie uma mensagem ao tutor contando por que quer adotar.</p>
-        </article>
+        </motion.article>
 
-        <article>
+        <motion.article {...staggerItemMotion}>
           <span>03</span>
           <h2>Acompanhe</h2>
           <p>Consulte seus pedidos e responda solicitacoes recebidas.</p>
-        </article>
-      </div>
+        </motion.article>
+      </motion.div>
 
-      <section className="home-stories-section reveal-on-scroll">
+      <motion.section className="home-stories-section" {...revealMotion}>
         <div className="home-section home-section--compact">
           <div>
             <p className="eyebrow">Historias reais</p>
@@ -287,9 +269,9 @@ export function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="home-owner-section reveal-on-scroll">
+      <motion.section className="home-owner-section" {...revealMotion}>
         <div className="home-owner-section__image" aria-hidden="true" />
         <div className="home-owner-section__content">
           <p className="eyebrow">Para tutores</p>
@@ -309,9 +291,9 @@ export function HomePage() {
             </Link>
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="home-final-cta reveal-on-scroll">
+      <motion.section className="home-final-cta" {...revealMotion}>
         <p className="eyebrow">Comece agora</p>
         <h2>Procure um animal ou anuncie um companheiro para adocao</h2>
         <div className="actions">
@@ -322,7 +304,7 @@ export function HomePage() {
             {isAuthenticated ? 'Meus pedidos' : 'Criar conta'}
           </Link>
         </div>
-      </section>
-    </section>
+      </motion.section>
+    </motion.section>
   )
 }

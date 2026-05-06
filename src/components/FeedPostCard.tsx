@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
   createFeedPostComment,
@@ -10,6 +11,7 @@ import type { FeedPostCommentResponse, FeedPostResponse } from '../types'
 import { formatFeedDate } from '../utils/feedPostFormatters'
 import { getApiErrorMessage } from '../utils/getApiErrorMessage'
 import { getInitials } from '../utils/getInitials'
+import { modalMotion } from '../utils/motionVariants'
 import { FeedPostEditor } from './FeedPostEditor'
 
 function LikeIcon() {
@@ -301,8 +303,15 @@ export function FeedPostCard({
                   <MoreIcon />
                 </button>
 
-                {isActionsMenuOpen && (
-                  <div className="feed-post__menu-dropdown">
+                <AnimatePresence>
+                  {isActionsMenuOpen && (
+                    <motion.div
+                      className="feed-post__menu-dropdown"
+                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                      transition={{ duration: 0.16 }}
+                    >
                     <button
                       type="button"
                       onClick={() => {
@@ -323,8 +332,9 @@ export function FeedPostCard({
                     >
                       {isDeleting ? 'Removendo...' : 'Remover'}
                     </button>
-                  </div>
-                )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
           </header>
@@ -422,9 +432,16 @@ export function FeedPostCard({
         </div>
       </article>
 
-      {isPostModalOpen && (
-        <div className="modal-backdrop feed-post-modal-backdrop">
-          <article className="feed-post-modal">
+      <AnimatePresence>
+        {isPostModalOpen && (
+        <motion.div
+          className="modal-backdrop feed-post-modal-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+        >
+          <motion.article className="feed-post-modal" {...modalMotion}>
             <button
               className="feed-post-modal__close"
               type="button"
@@ -544,8 +561,15 @@ export function FeedPostCard({
                           {'\u{1F642}'}
                         </button>
 
-                        {isEmojiMenuOpen && (
-                          <div className="feed-post__emoji-menu">
+                        <AnimatePresence>
+                          {isEmojiMenuOpen && (
+                          <motion.div
+                            className="feed-post__emoji-menu"
+                            initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                            transition={{ duration: 0.16 }}
+                          >
                             {emojiOptions.map((emoji) => (
                               <button
                                 key={emoji}
@@ -555,8 +579,9 @@ export function FeedPostCard({
                                 {emoji}
                               </button>
                             ))}
-                          </div>
-                        )}
+                          </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
 
                       {hasCommentText && (
@@ -620,9 +645,10 @@ export function FeedPostCard({
                 )}
               </div>
             </div>
-          </article>
-        </div>
-      )}
+          </motion.article>
+        </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }

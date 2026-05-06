@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import type { Area } from 'react-easy-crop'
+import { motion } from 'framer-motion'
 import { FeedComposer } from '../components/FeedComposer'
 import { FeedPostCard } from '../components/FeedPostCard'
 import { FeedProfileSidebar } from '../components/FeedProfileSidebar'
@@ -18,6 +19,11 @@ import { getUserById } from '../services/userService'
 import type { AnimalResponse, FeedPostResponse, UserResponse } from '../types'
 import { createCroppedImageFile } from '../utils/cropImage'
 import { getApiErrorMessage } from '../utils/getApiErrorMessage'
+import {
+  pageMotion,
+  staggerContainerMotion,
+  staggerItemMotion,
+} from '../utils/motionVariants'
 
 const MAX_FEED_PHOTO_SIZE = 4 * 1024 * 1024
 const ALLOWED_FEED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp']
@@ -270,11 +276,16 @@ export function FeedPage() {
   }
 
   return (
-    <section className="feed-page">
+    <motion.section className="feed-page" {...pageMotion}>
       <div className="feed-layout">
         <FeedProfileSidebar user={user} profile={profile} postCount={posts.length} />
 
-        <div className="feed-main-column">
+        <motion.div
+          className="feed-main-column"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08, duration: 0.45, ease: 'easeOut' }}
+        >
           <FeedComposer
             authorName={user?.name ?? 'Usuario'}
             profilePhotoUrl={profilePhotoUrl}
@@ -314,28 +325,29 @@ export function FeedPage() {
           )}
 
           {posts.length > 0 && (
-            <div className="feed-list">
+            <motion.div className="feed-list" {...staggerContainerMotion}>
               {posts.map((post) => (
-                <FeedPostCard
-                  key={post.id}
-                  post={post}
-                  currentUserId={user?.userId}
-                  currentUserName={user?.name}
-                  currentUserProfilePhotoUrl={profilePhotoUrl}
-                  isEditing={editingPostId === post.id}
-                  editingContent={editingContent}
-                  isDeleting={deletingPostId === post.id}
-                  isSaving={updatingPostId === post.id}
-                  onCancelEditing={cancelEditingPost}
-                  onDelete={handleDeletePost}
-                  onEdit={startEditingPost}
-                  onEditingContentChange={setEditingContent}
-                  onSaveEditing={handleUpdatePost}
-                />
+                <motion.div key={post.id} {...staggerItemMotion}>
+                  <FeedPostCard
+                    post={post}
+                    currentUserId={user?.userId}
+                    currentUserName={user?.name}
+                    currentUserProfilePhotoUrl={profilePhotoUrl}
+                    isEditing={editingPostId === post.id}
+                    editingContent={editingContent}
+                    isDeleting={deletingPostId === post.id}
+                    isSaving={updatingPostId === post.id}
+                    onCancelEditing={cancelEditingPost}
+                    onDelete={handleDeletePost}
+                    onEdit={startEditingPost}
+                    onEditingContentChange={setEditingContent}
+                    onSaveEditing={handleUpdatePost}
+                  />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
       </div>
 
       {photoToCropPreview && (
@@ -366,6 +378,6 @@ export function FeedPage() {
           </div>
         </div>
       )}
-    </section>
+    </motion.section>
   )
 }

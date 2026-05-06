@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { AnimalPhotoCarousel } from '../components/AnimalPhotoCarousel'
 import { getAnimalPhotos } from '../services/animalPhotoService'
@@ -11,6 +12,11 @@ import {
   formatAnimalSex,
 } from '../utils/animalFormatters'
 import { getApiErrorMessage } from '../utils/getApiErrorMessage'
+import {
+  pageMotion,
+  staggerContainerMotion,
+  staggerItemMotion,
+} from '../utils/motionVariants'
 
 export function AnimalsPage() {
   const [animals, setAnimals] = useState<AnimalResponse[]>([])
@@ -55,7 +61,7 @@ export function AnimalsPage() {
   }, [])
 
   return (
-    <section className="page">
+    <motion.section className="page" {...pageMotion}>
       <div>
         <p className="eyebrow">Animais</p>
         <h1>Animais disponiveis</h1>
@@ -71,9 +77,13 @@ export function AnimalsPage() {
       )}
 
       {animals.length > 0 && (
-        <div className="animal-grid">
+        <motion.div className="animal-grid" {...staggerContainerMotion}>
           {animals.map((animal) => (
-            <article className="animal-card" key={animal.id}>
+            <motion.article
+              className="animal-card"
+              key={animal.id}
+              {...staggerItemMotion}
+            >
               <AnimalPhotoCarousel
                 animalName={animal.animalName}
                 photos={photosByAnimalId[animal.id] ?? []}
@@ -114,10 +124,10 @@ export function AnimalsPage() {
                   Ver detalhes
                 </Link>
               </div>
-            </article>
+            </motion.article>
           ))}
-        </div>
+        </motion.div>
       )}
-    </section>
+    </motion.section>
   )
 }
