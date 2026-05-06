@@ -21,12 +21,24 @@ import { createCroppedImageFile } from '../utils/cropImage'
 import { getApiErrorMessage } from '../utils/getApiErrorMessage'
 import {
   pageMotion,
-  staggerContainerMotion,
   staggerItemMotion,
 } from '../utils/motionVariants'
 
 const MAX_FEED_PHOTO_SIZE = 4 * 1024 * 1024
 const ALLOWED_FEED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+
+const feedListMotion = {
+  initial: 'hidden',
+  animate: 'visible',
+  variants: {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  },
+} as const
 
 export function FeedPage() {
   const { user } = useAuth()
@@ -325,7 +337,7 @@ export function FeedPage() {
           )}
 
           {posts.length > 0 && (
-            <motion.div className="feed-list" {...staggerContainerMotion}>
+            <motion.div className="feed-list" {...feedListMotion}>
               {posts.map((post) => (
                 <motion.div key={post.id} {...staggerItemMotion}>
                   <FeedPostCard
