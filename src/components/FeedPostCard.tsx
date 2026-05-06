@@ -142,6 +142,14 @@ export function FeedPostCard({
     }
   }, [isActionsMenuOpen, isEmojiMenuOpen])
 
+  useEffect(() => {
+    if (post.commentCount === 0 || comments.length > 0) {
+      return
+    }
+
+    void loadComments()
+  }, [post.commentCount, comments.length])
+
   async function handleToggleLike() {
     if (isTogglingLike) {
       return
@@ -378,6 +386,34 @@ export function FeedPostCard({
     return compact ? content : <div className="feed-post-modal__comment-scroll">{content}</div>
   }
 
+  function renderCommentPreview() {
+    const [firstComment] = comments
+
+    if (!firstComment || isInlineCommentsOpen) {
+      return null
+    }
+
+    return (
+      <button
+        className="feed-post__comment-preview"
+        type="button"
+        onClick={openComments}
+      >
+        <span className="feed-post__comment-preview-avatar">
+          {firstComment.authorProfilePhotoUrl ? (
+            <img src={firstComment.authorProfilePhotoUrl} alt="" />
+          ) : (
+            getInitials(firstComment.authorName)
+          )}
+        </span>
+        <span>
+          <strong>{firstComment.authorName}</strong>
+          {firstComment.content}
+        </span>
+      </button>
+    )
+  }
+
   return (
     <>
       <article className="feed-post">
@@ -559,6 +595,8 @@ export function FeedPostCard({
                   Comentar
                 </button>
               </div>
+
+              {renderCommentPreview()}
 
               {interactionError && (
                 <p className="feed-post__interaction-error">
