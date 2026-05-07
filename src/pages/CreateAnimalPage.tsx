@@ -444,7 +444,6 @@ export function CreateAnimalPage() {
               accept="image/jpeg,image/png,image/webp"
               multiple
               onChange={(event) => handlePhotoChange(event.target.files)}
-              required
             />
             {photoFiles.length > 0 && (
               <div className="selected-photos">
