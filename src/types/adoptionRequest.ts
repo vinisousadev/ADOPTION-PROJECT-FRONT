@@ -24,3 +24,18 @@ export type AdoptionRequestResponse = {
   ownerCity?: string
   ownerState?: string
 }
+
+export type AdoptionRequestMessageResponse = {
+  id: number
+  adoptionRequestId: number
+  senderId: number
+  senderName: string
+  senderProfilePhotoUrl?: string
+  message: string
+  createdAt: string
+  readAt?: string | null
+}
+
+export type CreateAdoptionRequestMessageRequest = {
+  message: string
+}

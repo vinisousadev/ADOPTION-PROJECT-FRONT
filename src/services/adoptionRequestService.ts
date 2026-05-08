@@ -1,5 +1,7 @@
 import type {
+  AdoptionRequestMessageResponse,
   AdoptionRequestResponse,
+  CreateAdoptionRequestMessageRequest,
   CreateAdoptionRequest,
   PagedResponse,
 } from '../types'
@@ -74,6 +76,28 @@ export async function cancelAdoptionRequest(
 ): Promise<AdoptionRequestResponse> {
   const response = await api.patch<AdoptionRequestResponse>(
     `/adoption-requests/${id}/cancel`,
+  )
+
+  return response.data
+}
+
+export async function getAdoptionRequestMessages(
+  adoptionRequestId: number,
+): Promise<PagedResponse<AdoptionRequestMessageResponse>> {
+  const response = await api.get<PagedResponse<AdoptionRequestMessageResponse>>(
+    `/adoption-requests/${adoptionRequestId}/messages`,
+  )
+
+  return response.data
+}
+
+export async function sendAdoptionRequestMessage(
+  adoptionRequestId: number,
+  request: CreateAdoptionRequestMessageRequest,
+): Promise<AdoptionRequestMessageResponse> {
+  const response = await api.post<AdoptionRequestMessageResponse>(
+    `/adoption-requests/${adoptionRequestId}/messages`,
+    request,
   )
 
   return response.data

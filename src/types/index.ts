@@ -15,8 +15,10 @@ export type {
   YesNo,
 } from './animal'
 export type {
+  AdoptionRequestMessageResponse,
   AdoptionRequestResponse,
   AdoptionRequestStatus,
+  CreateAdoptionRequestMessageRequest,
   CreateAdoptionRequest,
 } from './adoptionRequest'
 export type {

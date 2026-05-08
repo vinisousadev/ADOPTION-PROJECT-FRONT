@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { AdoptionRequestResponse } from '../types'
+import { AdoptionRequestChatModal } from './AdoptionRequestChatModal'
 import {
   formatAdoptionRequestStatus,
   formatDateTime,
@@ -18,6 +20,8 @@ export function AdoptionRequestCard({
   children,
   variant,
 }: AdoptionRequestCardProps) {
+  const [isChatOpen, setIsChatOpen] = useState(false)
+
   return (
     <article className="request-card">
       <div className="request-card__header">
@@ -54,13 +58,30 @@ export function AdoptionRequestCard({
 
       <div className="actions request-card__actions">
         <div className="request-card__decision-actions">{children}</div>
-        <Link
-          className="button button--secondary"
-          to={`/animals/${request.animalId}`}
-        >
-          Ver detalhes
-        </Link>
+        <div className="request-card__secondary-actions">
+          <button
+            className="button button--secondary"
+            type="button"
+            onClick={() => setIsChatOpen(true)}
+          >
+            Conversar
+          </button>
+          <Link
+            className="button button--secondary"
+            to={`/animals/${request.animalId}`}
+          >
+            Ver detalhes
+          </Link>
+        </div>
       </div>
+
+      {isChatOpen && (
+        <AdoptionRequestChatModal
+          request={request}
+          variant={variant}
+          onClose={() => setIsChatOpen(false)}
+        />
+      )}
     </article>
   )
 }

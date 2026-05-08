@@ -3327,6 +3327,252 @@
   gap: 12px;
 }
 
+.request-card__secondary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.adoption-chat-backdrop {
+  z-index: 130;
+}
+
+.adoption-chat-modal {
+  width: min(760px, 100%);
+  max-height: min(760px, calc(100vh - 48px));
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-clay-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.adoption-chat__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--color-border);
+  padding: 20px;
+  background: var(--color-surface);
+}
+
+.adoption-chat__header h2 {
+  margin: 0 0 4px;
+  color: var(--color-text-strong);
+  font-size: 26px;
+  font-weight: 900;
+}
+
+.adoption-chat__header p {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.adoption-chat__header strong {
+  color: var(--color-text-strong);
+}
+
+.adoption-chat__close {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-surface-raised);
+  color: var(--color-text-strong);
+  cursor: pointer;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.adoption-chat__summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--color-border);
+  padding: 12px 20px;
+  background: var(--color-surface-raised);
+}
+
+.adoption-chat__summary span,
+.adoption-chat__summary a {
+  border-radius: 999px;
+  padding: 7px 12px;
+  background: rgba(79, 159, 110, 0.1);
+  color: var(--color-primary-hover);
+  font-size: 12px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.adoption-chat__messages {
+  min-height: 260px;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  overflow-y: auto;
+  padding: 20px;
+  background: linear-gradient(
+      135deg,
+      rgba(79, 159, 110, 0.05),
+      rgba(242, 184, 128, 0.08)
+    ),
+    var(--color-surface-muted);
+}
+
+.adoption-chat__messages::-webkit-scrollbar {
+  width: 8px;
+}
+
+.adoption-chat__messages::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(79, 159, 110, 0.28);
+}
+
+.adoption-chat__empty {
+  margin: auto;
+  max-width: 360px;
+  color: var(--color-text);
+  text-align: center;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.adoption-chat__message {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+}
+
+.adoption-chat__message--own {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.adoption-chat__message--own .adoption-chat__avatar {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.adoption-chat__message--own > div {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: end;
+  background: rgba(79, 159, 110, 0.16);
+}
+
+.adoption-chat__avatar {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(79, 159, 110, 0.24);
+  border-radius: 999px;
+  background: rgba(242, 184, 128, 0.18);
+  color: var(--color-primary-hover);
+  font-size: 13px;
+  font-weight: 900;
+  box-shadow:
+    0 8px 16px rgba(79, 159, 110, 0.1),
+    inset 0 1px 2px rgba(255, 255, 255, 0.58),
+    inset 0 -3px 6px rgba(79, 159, 110, 0.1);
+}
+
+.adoption-chat__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.adoption-chat__message > div {
+  width: fit-content;
+  max-width: min(520px, 100%);
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  padding: 12px 14px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.adoption-chat__message-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.adoption-chat__message-meta strong {
+  color: var(--color-text-strong);
+  font-size: 13px;
+}
+
+.adoption-chat__message-meta span {
+  color: var(--color-text);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.adoption-chat__message p {
+  margin: 0;
+  color: var(--color-text-strong);
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.adoption-chat-modal > .form-error {
+  margin: 12px 20px 0;
+}
+
+.adoption-chat__composer {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: end;
+  gap: 10px;
+  border-top: 1px solid var(--color-border);
+  padding: 16px 20px 20px;
+  background: var(--color-surface);
+}
+
+.adoption-chat__input {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+}
+
+.adoption-chat__input textarea {
+  min-height: 46px;
+  max-height: 150px;
+  resize: none;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 13px 15px;
+  background: var(--color-surface-raised);
+  color: var(--color-text-strong);
+  font: inherit;
+  line-height: 1.4;
+  box-shadow: inset 0 2px 5px rgba(116, 94, 67, 0.08);
+}
+
+.adoption-chat__input textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.68;
+}
+
+.adoption-chat__input .button {
+  min-height: 42px;
+  padding: 0 16px;
+}
+
 /* Claymorphism design system layer */
 .app-header {
   border-bottom: 0;
@@ -3844,10 +4090,41 @@
 
 :root[data-theme='dark'] .feed-post__comment > div:last-child,
 :root[data-theme='dark'] .feed-post-modal,
+:root[data-theme='dark'] .adoption-chat-modal,
 :root[data-theme='dark'] .feed-composer-emoji__menu,
 :root[data-theme='dark'] .feed-post__emoji-menu {
   border-color: rgba(51, 70, 87, 0.92);
   background: #223140;
+}
+
+:root[data-theme='dark'] .adoption-chat__header,
+:root[data-theme='dark'] .adoption-chat__composer {
+  background: rgba(27, 39, 51, 0.94);
+}
+
+:root[data-theme='dark'] .adoption-chat__summary,
+:root[data-theme='dark'] .adoption-chat__messages {
+  background:
+    linear-gradient(135deg, rgba(118, 200, 147, 0.08), rgba(242, 184, 128, 0.06)),
+    rgba(20, 31, 42, 0.92);
+}
+
+:root[data-theme='dark'] .adoption-chat__close,
+:root[data-theme='dark'] .adoption-chat__message > div,
+:root[data-theme='dark'] .adoption-chat__input textarea {
+  border-color: rgba(51, 70, 87, 0.92);
+  background: rgba(34, 49, 64, 0.92);
+}
+
+:root[data-theme='dark'] .adoption-chat__message--own > div {
+  background: rgba(118, 200, 147, 0.14);
+}
+
+:root[data-theme='dark'] .adoption-chat__summary span,
+:root[data-theme='dark'] .adoption-chat__summary a,
+:root[data-theme='dark'] .adoption-chat__avatar {
+  background: rgba(242, 184, 128, 0.14);
+  color: #f0c48f;
 }
 
 :root[data-theme='dark'] .feed-post-modal__comments .feed-post__comment > div:last-child {
@@ -4208,6 +4485,36 @@
 
   .request-card dl {
     grid-template-columns: 1fr;
+  }
+
+  .request-card__actions,
+  .request-card__secondary-actions {
+    justify-content: stretch;
+  }
+
+  .request-card__secondary-actions .button,
+  .request-card__decision-actions .button {
+    width: 100%;
+  }
+
+  .adoption-chat-modal {
+    max-height: calc(100vh - 24px);
+  }
+
+  .adoption-chat__header,
+  .adoption-chat__composer,
+  .adoption-chat__messages,
+  .adoption-chat__summary {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .adoption-chat__input {
+    grid-template-columns: 1fr;
+  }
+
+  .adoption-chat__input .button {
+    width: 100%;
   }
 
   .adoption-terms-summary {
