@@ -73,9 +73,12 @@ export function AdoptionRequestChatModal({
     request.status === 'PENDING' || request.status === 'APPROVED'
 
   useEffect(() => {
-    async function loadMessages() {
+    async function loadMessages(showLoading = false) {
       setErrorMessage('')
-      setIsLoading(true)
+
+      if (showLoading) {
+        setIsLoading(true)
+      }
 
       try {
         const response = await getAdoptionRequestMessages(request.id)
@@ -83,11 +86,19 @@ export function AdoptionRequestChatModal({
       } catch (error) {
         setErrorMessage(getApiErrorMessage(error))
       } finally {
-        setIsLoading(false)
+        if (showLoading) {
+          setIsLoading(false)
+        }
       }
     }
 
-    loadMessages()
+    loadMessages(true)
+
+    const intervalId = window.setInterval(() => {
+      loadMessages()
+    }, 10000)
+
+    return () => window.clearInterval(intervalId)
   }, [request.id])
 
   useEffect(() => {
