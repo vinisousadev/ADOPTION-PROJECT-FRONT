@@ -5,7 +5,8 @@ import { AnimalPhotoCarousel } from '../components/AnimalPhotoCarousel'
 import { useAuth } from '../contexts/AuthContext'
 import { getAnimalPhotos } from '../services/animalPhotoService'
 import { deleteAnimal, getAvailableAnimals } from '../services/animalService'
-import type { AnimalPhotoResponse, AnimalResponse } from '../types'
+import { getUserById } from '../services/userService'
+import type { AnimalPhotoResponse, AnimalResponse, UserResponse } from '../types'
 import {
   formatAnimalAge,
   formatAnimalLocation,
@@ -21,6 +22,7 @@ import {
 
 export function AnimalsPage() {
   const { user } = useAuth()
+  const [profile, setProfile] = useState<UserResponse | null>(null)
   const [animals, setAnimals] = useState<AnimalResponse[]>([])
   const [photosByAnimalId, setPhotosByAnimalId] = useState<
     Record<number, AnimalPhotoResponse[]>
@@ -30,7 +32,7 @@ export function AnimalsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [deletingAnimalId, setDeletingAnimalId] = useState<number | null>(null)
 
-  const isAdmin = user?.userType === 'ADMIN'
+  const isAdmin = (profile?.userType ?? user?.userType) === 'ADMIN'
 
   useEffect(() => {
     async function loadAnimals() {
@@ -65,6 +67,26 @@ export function AnimalsPage() {
 
     loadAnimals()
   }, [])
+
+  useEffect(() => {
+    if (!user) {
+      setProfile(null)
+      return
+    }
+
+    const userId = user.userId
+
+    async function loadProfile() {
+      try {
+        const userProfile = await getUserById(userId)
+        setProfile(userProfile)
+      } catch {
+        setProfile(null)
+      }
+    }
+
+    loadProfile()
+  }, [user])
 
   async function handleDeleteAnimal(animal: AnimalResponse) {
     const shouldDelete = window.confirm(

@@ -6,7 +6,8 @@ import { useAuth } from '../contexts/AuthContext'
 import { createAdoptionRequest } from '../services/adoptionRequestService'
 import { getAnimalPhotos } from '../services/animalPhotoService'
 import { deleteAnimal, getAnimalById } from '../services/animalService'
-import type { AnimalPhotoResponse, AnimalResponse } from '../types'
+import { getUserById } from '../services/userService'
+import type { AnimalPhotoResponse, AnimalResponse, UserResponse } from '../types'
 import {
   formatAnimalAge,
   formatAnimalLocation,
@@ -34,6 +35,7 @@ export function AnimalDetailsPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { isAuthenticated, user } = useAuth()
+  const [profile, setProfile] = useState<UserResponse | null>(null)
   const [animal, setAnimal] = useState<AnimalResponse | null>(null)
   const [photos, setPhotos] = useState<AnimalPhotoResponse[]>([])
   const [adoptionMessage, setAdoptionMessage] = useState('')
@@ -50,7 +52,7 @@ export function AnimalDetailsPage() {
   const [isDeletingAnimal, setIsDeletingAnimal] = useState(false)
 
   const animalId = Number(id)
-  const isAdmin = user?.userType === 'ADMIN'
+  const isAdmin = (profile?.userType ?? user?.userType) === 'ADMIN'
 
   function handleTermsScroll(event: UIEvent<HTMLDivElement>) {
     const termsElement = event.currentTarget
@@ -103,6 +105,26 @@ export function AnimalDetailsPage() {
 
     loadAnimalDetails()
   }, [animalId])
+
+  useEffect(() => {
+    if (!user) {
+      setProfile(null)
+      return
+    }
+
+    const userId = user.userId
+
+    async function loadProfile() {
+      try {
+        const userProfile = await getUserById(userId)
+        setProfile(userProfile)
+      } catch {
+        setProfile(null)
+      }
+    }
+
+    loadProfile()
+  }, [user])
 
   async function handleAdoptionRequestSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
