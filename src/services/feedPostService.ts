@@ -103,3 +103,13 @@ export async function patchFeedPost(
 export async function deleteFeedPost(id: number): Promise<void> {
   await api.delete(`/feed-posts/${id}`)
 }
+
+export async function deleteFeedPostComment(
+  commentId: number,
+): Promise<FeedPostCommentResponse> {
+  const response = await api.delete<FeedPostCommentResponse>(
+    `/feed-posts/comments/${commentId}`,
+  )
+
+  return response.data
+}

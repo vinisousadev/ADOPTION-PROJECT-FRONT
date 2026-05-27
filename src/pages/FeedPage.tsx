@@ -345,6 +345,7 @@ export function FeedPage() {
                     currentUserId={user?.userId}
                     currentUserName={user?.name}
                     currentUserProfilePhotoUrl={profilePhotoUrl}
+                    currentUserType={user?.userType}
                     isEditing={editingPostId === post.id}
                     editingContent={editingContent}
                     isDeleting={deletingPostId === post.id}

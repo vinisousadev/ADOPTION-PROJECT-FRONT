@@ -1,14 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
   createFeedPostComment,
+  deleteFeedPostComment,
   getFeedPostComments,
   likeFeedPost,
   unlikeFeedPost,
 } from '../services/feedPostService'
-import type { FeedPostCommentResponse, FeedPostResponse } from '../types'
+import type { FeedPostCommentResponse, FeedPostResponse, UserType } from '../types'
 import { formatFeedDate } from '../utils/feedPostFormatters'
 import { getApiErrorMessage } from '../utils/getApiErrorMessage'
 import { getInitials } from '../utils/getInitials'
@@ -50,6 +51,7 @@ type FeedPostCardProps = {
   currentUserId?: number
   currentUserName?: string
   currentUserProfilePhotoUrl?: string
+  currentUserType?: UserType
   isEditing: boolean
   editingContent: string
   isDeleting: boolean
@@ -66,6 +68,7 @@ export function FeedPostCard({
   currentUserId,
   currentUserName = 'Usuario',
   currentUserProfilePhotoUrl,
+  currentUserType,
   isEditing,
   editingContent,
   isDeleting,
@@ -76,7 +79,10 @@ export function FeedPostCard({
   onEditingContentChange,
   onSaveEditing,
 }: FeedPostCardProps) {
-  const canManage = currentUserId === post.authorUserId
+  const isAdmin = currentUserType === 'ADMIN'
+  const isPostAuthor = currentUserId === post.authorUserId
+  const canEditPost = isPostAuthor
+  const canDeletePost = isPostAuthor || isAdmin
   const commentTextareaRef = useRef<HTMLTextAreaElement | null>(null)
   const actionsMenuRef = useRef<HTMLDivElement | null>(null)
   const emojiMenuRef = useRef<HTMLDivElement | null>(null)
@@ -91,6 +97,7 @@ export function FeedPostCard({
   const [isLoadingComments, setIsLoadingComments] = useState(false)
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
   const [isTogglingLike, setIsTogglingLike] = useState(false)
+  const [deletingCommentId, setDeletingCommentId] = useState<number | null>(null)
   const [commentsPage, setCommentsPage] = useState(0)
   const [hasMoreComments, setHasMoreComments] = useState(false)
   const [interactionError, setInteractionError] = useState('')
@@ -142,14 +149,6 @@ export function FeedPostCard({
     }
   }, [isActionsMenuOpen, isEmojiMenuOpen])
 
-  useEffect(() => {
-    if (post.commentCount === 0 || comments.length > 0) {
-      return
-    }
-
-    void loadComments()
-  }, [post.commentCount, comments.length])
-
   async function handleToggleLike() {
     if (isTogglingLike) {
       return
@@ -172,7 +171,7 @@ export function FeedPostCard({
     }
   }
 
-  async function loadComments(page = 0) {
+  const loadComments = useCallback(async (page = 0) => {
     if (isLoadingComments) {
       return
     }
@@ -191,7 +190,19 @@ export function FeedPostCard({
     } finally {
       setIsLoadingComments(false)
     }
-  }
+  }, [isLoadingComments, post.id])
+
+  useEffect(() => {
+    if (post.commentCount === 0 || comments.length > 0) {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      void loadComments()
+    }, 0)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [post.commentCount, comments.length, loadComments])
 
   function openPostModal() {
     if (!post.imageUrl) {
@@ -258,6 +269,29 @@ export function FeedPostCard({
       setInteractionError(getApiErrorMessage(error))
     } finally {
       setIsSubmittingComment(false)
+    }
+  }
+
+  async function handleDeleteComment(comment: FeedPostCommentResponse) {
+    const shouldDelete = window.confirm('Deseja remover este comentario?')
+
+    if (!shouldDelete) {
+      return
+    }
+
+    setInteractionError('')
+    setDeletingCommentId(comment.id)
+
+    try {
+      await deleteFeedPostComment(comment.id)
+      setComments((currentComments) =>
+        currentComments.filter((currentComment) => currentComment.id !== comment.id),
+      )
+      setCommentCount((currentCount) => Math.max(currentCount - 1, 0))
+    } catch (error) {
+      setInteractionError(getApiErrorMessage(error))
+    } finally {
+      setDeletingCommentId(null)
     }
   }
 
@@ -363,7 +397,19 @@ export function FeedPostCard({
                 )}
               </div>
               <div>
-                <strong>{comment.authorName}</strong>
+                <div className="feed-post__comment-header">
+                  <strong>{comment.authorName}</strong>
+                  {(isAdmin || currentUserId === comment.authorUserId) && (
+                    <button
+                      className="feed-post__comment-delete"
+                      type="button"
+                      disabled={deletingCommentId === comment.id}
+                      onClick={() => handleDeleteComment(comment)}
+                    >
+                      {deletingCommentId === comment.id ? 'Removendo...' : 'Remover'}
+                    </button>
+                  )}
+                </div>
                 <p>{comment.content}</p>
               </div>
             </article>
@@ -464,7 +510,7 @@ export function FeedPostCard({
               <span>{formatFeedDate(post.createdAt)}</span>
             </div>
 
-            {canManage && !isEditing && (
+            {canDeletePost && !isEditing && (
               <div
                 ref={actionsMenuRef}
                 className="feed-post__menu"
@@ -491,15 +537,17 @@ export function FeedPostCard({
                       exit={{ opacity: 0, y: 8, scale: 0.98 }}
                       transition={{ duration: 0.16 }}
                     >
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsActionsMenuOpen(false)
-                        onEdit(post)
-                      }}
-                    >
-                      Editar post
-                    </button>
+                    {canEditPost && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsActionsMenuOpen(false)
+                          onEdit(post)
+                        }}
+                      >
+                        Editar post
+                      </button>
+                    )}
                     <button
                       className="feed-post__menu-danger"
                       type="button"

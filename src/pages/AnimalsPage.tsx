@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { AnimalPhotoCarousel } from '../components/AnimalPhotoCarousel'
+import { useAuth } from '../contexts/AuthContext'
 import { getAnimalPhotos } from '../services/animalPhotoService'
-import { getAvailableAnimals } from '../services/animalService'
+import { deleteAnimal, getAvailableAnimals } from '../services/animalService'
 import type { AnimalPhotoResponse, AnimalResponse } from '../types'
 import {
   formatAnimalAge,
@@ -19,12 +20,17 @@ import {
 } from '../utils/motionVariants'
 
 export function AnimalsPage() {
+  const { user } = useAuth()
   const [animals, setAnimals] = useState<AnimalResponse[]>([])
   const [photosByAnimalId, setPhotosByAnimalId] = useState<
     Record<number, AnimalPhotoResponse[]>
   >({})
   const [errorMessage, setErrorMessage] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [deletingAnimalId, setDeletingAnimalId] = useState<number | null>(null)
+
+  const isAdmin = user?.userType === 'ADMIN'
 
   useEffect(() => {
     async function loadAnimals() {
@@ -60,6 +66,37 @@ export function AnimalsPage() {
     loadAnimals()
   }, [])
 
+  async function handleDeleteAnimal(animal: AnimalResponse) {
+    const shouldDelete = window.confirm(
+      `Deseja remover ${animal.animalName} da listagem?`,
+    )
+
+    if (!shouldDelete) {
+      return
+    }
+
+    setErrorMessage('')
+    setSuccessMessage('')
+    setDeletingAnimalId(animal.id)
+
+    try {
+      await deleteAnimal(animal.id)
+      setAnimals((currentAnimals) =>
+        currentAnimals.filter((currentAnimal) => currentAnimal.id !== animal.id),
+      )
+      setPhotosByAnimalId((currentPhotos) => {
+        const nextPhotos = { ...currentPhotos }
+        delete nextPhotos[animal.id]
+        return nextPhotos
+      })
+      setSuccessMessage('Animal removido com sucesso.')
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error))
+    } finally {
+      setDeletingAnimalId(null)
+    }
+  }
+
   return (
     <motion.section className="page" {...pageMotion}>
       <div>
@@ -71,6 +108,7 @@ export function AnimalsPage() {
 
       {isLoading && <p>Carregando animais...</p>}
       {errorMessage && <p className="form-error">{errorMessage}</p>}
+      {successMessage && <p className="form-success">{successMessage}</p>}
 
       {!isLoading && !errorMessage && animals.length === 0 && (
         <p className="empty-state">Nenhum animal disponivel no momento.</p>
@@ -123,6 +161,16 @@ export function AnimalsPage() {
                 >
                   Ver detalhes
                 </Link>
+                {isAdmin && (
+                  <button
+                    className="button button--danger"
+                    type="button"
+                    disabled={deletingAnimalId === animal.id}
+                    onClick={() => handleDeleteAnimal(animal)}
+                  >
+                    {deletingAnimalId === animal.id ? 'Removendo...' : 'Remover'}
+                  </button>
+                )}
               </div>
             </motion.article>
           ))}

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent, UIEvent } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { AnimalPhotoCarousel } from '../components/AnimalPhotoCarousel'
 import { useAuth } from '../contexts/AuthContext'
 import { createAdoptionRequest } from '../services/adoptionRequestService'
 import { getAnimalPhotos } from '../services/animalPhotoService'
-import { getAnimalById } from '../services/animalService'
+import { deleteAnimal, getAnimalById } from '../services/animalService'
 import type { AnimalPhotoResponse, AnimalResponse } from '../types'
 import {
   formatAnimalAge,
@@ -32,6 +32,7 @@ const adoptionResponsibilityTerms = [
 
 export function AnimalDetailsPage() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const { isAuthenticated, user } = useAuth()
   const [animal, setAnimal] = useState<AnimalResponse | null>(null)
   const [photos, setPhotos] = useState<AnimalPhotoResponse[]>([])
@@ -46,8 +47,10 @@ export function AnimalDetailsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmittingAdoptionRequest, setIsSubmittingAdoptionRequest] =
     useState(false)
+  const [isDeletingAnimal, setIsDeletingAnimal] = useState(false)
 
   const animalId = Number(id)
+  const isAdmin = user?.userType === 'ADMIN'
 
   function handleTermsScroll(event: UIEvent<HTMLDivElement>) {
     const termsElement = event.currentTarget
@@ -147,6 +150,34 @@ export function AnimalDetailsPage() {
     }
   }
 
+  async function handleDeleteAnimal() {
+    if (!animal) {
+      return
+    }
+
+    const shouldDelete = window.confirm(
+      `Deseja remover ${animal.animalName} da listagem?`,
+    )
+
+    if (!shouldDelete) {
+      return
+    }
+
+    setErrorMessage('')
+    setIsDeletingAnimal(true)
+
+    try {
+      await deleteAnimal(animal.id)
+      navigate('/animals', {
+        replace: true,
+      })
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error))
+    } finally {
+      setIsDeletingAnimal(false)
+    }
+  }
+
   if (isLoading) {
     return (
       <section className="page">
@@ -223,6 +254,19 @@ export function AnimalDetailsPage() {
           <h2>Descricao</h2>
           <p>{animal.description || 'Sem descricao informada.'}</p>
         </div>
+
+        {isAdmin && (
+          <div className="actions">
+            <button
+              className="button button--danger"
+              type="button"
+              disabled={isDeletingAnimal}
+              onClick={handleDeleteAnimal}
+            >
+              {isDeletingAnimal ? 'Removendo...' : 'Remover animal'}
+            </button>
+          </div>
+        )}
 
         <form className="adoption-request-panel" onSubmit={handleAdoptionRequestSubmit}>
           <div>
