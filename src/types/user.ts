@@ -1,4 +1,5 @@
 export type UserType = 'COMMON' | 'ADMIN'
+export type UserRoleLabel = 'ONG' | 'PROTETOR'
 
 export type CreateUserRequest = {
   name: string
@@ -8,6 +9,7 @@ export type CreateUserRequest = {
   city?: string
   state?: string
   passwordHash: string
+  roleLabel?: UserRoleLabel
 }
 
 export type UserResponse = {
@@ -20,5 +22,6 @@ export type UserResponse = {
   state?: string
   profilePhotoUrl?: string
   registrationDate: string
+  roleLabel: UserRoleLabel
   userType: UserType
 }

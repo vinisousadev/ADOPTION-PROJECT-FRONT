@@ -8,8 +8,8 @@ type FeedProfileSidebarProps = {
   postCount: number
 }
 
-function getRoleLabel(userType?: UserResponse['userType']) {
-  if (userType === 'ADMIN') {
+function getRoleLabel(roleLabel?: UserResponse['roleLabel']) {
+  if (roleLabel === 'ONG') {
     return 'ONG'
   }
 
@@ -39,7 +39,7 @@ export function FeedProfileSidebar({
 }: FeedProfileSidebarProps) {
   const displayName = profile?.name ?? user?.name ?? 'Usuario'
   const photoUrl = profile?.profilePhotoUrl
-  const roleLabel = getRoleLabel(profile?.userType)
+  const roleLabel = getRoleLabel(profile?.roleLabel)
   const location = getLocation(profile)
 
   return (

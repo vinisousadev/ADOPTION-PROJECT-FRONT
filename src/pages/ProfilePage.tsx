@@ -12,6 +12,10 @@ function formatUserType(userType: string) {
   return userType === 'ADMIN' ? 'Administrador' : 'Usuario comum'
 }
 
+function formatRoleLabel(roleLabel?: UserResponse['roleLabel']) {
+  return roleLabel === 'ONG' ? 'ONG' : 'Protetor'
+}
+
 function formatOptionalValue(value?: string) {
   return value || 'Nao informado'
 }
@@ -221,6 +225,10 @@ export function ProfilePage() {
         <div>
           <dt>Tipo de usuario</dt>
           <dd>{formatUserType(profileUserType)}</dd>
+        </div>
+        <div>
+          <dt>Perfil publico</dt>
+          <dd>{formatRoleLabel(profile?.roleLabel)}</dd>
         </div>
         <div>
           <dt>Telefone</dt>

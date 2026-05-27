@@ -6,7 +6,7 @@ import {
   getCitiesByState,
 } from '../services/locationService'
 import { createUser } from '../services/userService'
-import type { BrazilianCity, BrazilianState } from '../types'
+import type { BrazilianCity, BrazilianState, UserRoleLabel } from '../types'
 import { getApiErrorMessage } from '../utils/getApiErrorMessage'
 import { onlyDigits } from '../utils/onlyDigits'
 
@@ -16,6 +16,7 @@ type RegisterFormState = {
   email: string
   city: string
   state: string
+  roleLabel: UserRoleLabel
   password: string
 }
 
@@ -25,6 +26,7 @@ const initialFormState: RegisterFormState = {
   email: '',
   city: '',
   state: '',
+  roleLabel: 'PROTETOR',
   password: '',
 }
 
@@ -137,6 +139,7 @@ export function RegisterPage() {
         city: form.city || undefined,
         state: form.state ? form.state.toUpperCase() : undefined,
         passwordHash: form.password,
+        roleLabel: form.roleLabel,
       })
 
       setForm(initialFormState)
@@ -205,6 +208,21 @@ export function RegisterPage() {
               maxLength={120}
               autoComplete="email"
             />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="roleLabel">Tipo de perfil</label>
+            <select
+              id="roleLabel"
+              value={form.roleLabel}
+              onChange={(event) =>
+                updateField('roleLabel', event.target.value as UserRoleLabel)
+              }
+              required
+            >
+              <option value="PROTETOR">Protetor</option>
+              <option value="ONG">ONG</option>
+            </select>
           </div>
 
           <div className="form-field">

@@ -4,7 +4,12 @@ export type {
   LoginRequest,
   LoginResponse,
 } from './auth'
-export type { CreateUserRequest, UserResponse, UserType } from './user'
+export type {
+  CreateUserRequest,
+  UserResponse,
+  UserRoleLabel,
+  UserType,
+} from './user'
 export type {
   AgeUnit,
   AnimalResponse,
